@@ -130,7 +130,7 @@
     .main-col{margin-left:0;}
   }
   .byd-badge{position:relative;width:200px;height:200px;flex:0 0 auto;border-radius:40px;
-    background:radial-gradient(circle at 30% 25%, #4a5a78 0%, #1c2740 45%, #0a1120 100%);
+    background:radial-gradient(circle at 30% 25%, var(--navy-light) 0%, var(--navy) 55%, #060d1d 100%);
     box-shadow:0 1px 0 rgba(255,255,255,0.35) inset, 0 -4px 10px rgba(0,0,0,0.55) inset,
       0 24px 50px rgba(0,0,0,0.5), 0 2px 0 rgba(255,255,255,0.08);
     display:flex;align-items:center;justify-content:center;
@@ -252,15 +252,15 @@
   .r-kpi.green::before{background:var(--green);}
   .r-kpi.amber::before{background:var(--amber);}
   .r-kpi.red::before{background:var(--accent);}
-  .r-kpi .lbl{font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.03em;}
-  .r-kpi .val{font-size:24px;font-weight:800;color:var(--text);margin-top:2px;line-height:1.1;}
-  .r-kpi .sub{font-size:11px;color:var(--muted);margin-top:2px;}
-  .r-charts-row{display:grid;grid-template-columns:0.8fr 1.3fr;gap:18px;align-items:center;margin-bottom:20px;}
+  .r-kpi .lbl{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.03em;}
+  .r-kpi .val{font-size:28px;font-weight:800;color:var(--text);margin-top:2px;line-height:1.1;}
+  .r-kpi .sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .r-charts-row{display:grid;grid-template-columns:1fr 1.05fr;gap:18px;align-items:center;margin-bottom:20px;}
   .r-donut-card, .r-timeline-card{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--glass-shadow);transition:background-color .25s ease;}
-  .r-timeline-card img{width:100%;height:auto;display:block;}
-  .r-section-title{font-size:15px;font-weight:700;color:var(--text);margin:18px 0 8px;}
-  .r-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;}
-  .r-table th{background:var(--navy);color:#fff;text-align:left;padding:6px 9px;font-size:10px;text-transform:uppercase;letter-spacing:.02em;}
+  .r-timeline-card img{width:100%;height:auto;max-height:280px;object-fit:contain;display:block;margin:0 auto;}
+  .r-section-title{font-size:17px;font-weight:700;color:var(--text);margin:18px 0 8px;}
+  .r-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:6px;}
+  .r-table th{background:var(--navy);color:#fff;text-align:left;padding:6px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.02em;}
   .r-table td{padding:6px 9px;border-bottom:1px solid var(--border);}
   .r-table tr:nth-child(even) td{background:#f7f9fc;}
   .r-amber{color:var(--amber);font-weight:700;}
@@ -460,16 +460,16 @@
 
       <div class="r-charts-row">
         <div class="r-donut-card">
-          <div class="donut-wrap" style="width:170px;height:170px;">
-            <svg width="170" height="170" viewBox="0 0 240 240">
+          <div class="donut-wrap" style="width:240px;height:240px;">
+            <svg width="240" height="240" viewBox="0 0 240 240">
               <circle cx="120" cy="120" r="100" fill="none" stroke="rgba(15,31,61,0.07)" stroke-width="26"/>
               <circle id="rSegOfficial" cx="120" cy="120" r="100" fill="none" stroke="#0ad97e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
               <circle id="rSegTested" cx="120" cy="120" r="100" fill="none" stroke="#ffab00" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
               <circle id="rSegNotTested" cx="120" cy="120" r="100" fill="none" stroke="#ff3b4e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
             </svg>
             <div class="donut-center">
-              <span class="pct" id="rDonutPct" style="font-size:28px;">0%</span>
-              <span class="lbl" style="font-size:10.5px;">concluído oficialmente</span>
+              <span class="pct" id="rDonutPct" style="font-size:40px;">0%</span>
+              <span class="lbl" style="font-size:12px;">concluído oficialmente</span>
             </div>
           </div>
         </div>
