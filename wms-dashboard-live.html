@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WMS Implementation — Status Dashboard</title>
+<script>
+  // Applies any previously saved theme before first paint, to avoid a flash
+  // of the default theme for returning visitors who picked a different one.
+  (function(){
+    try{
+      var t = localStorage.getItem('wmsTheme');
+      if(t && t !== 'classic') document.documentElement.setAttribute('data-theme', t);
+    }catch(err){}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -25,16 +35,58 @@
     --glass-bg:rgba(255,255,255,0.58);
     --glass-border:rgba(255,255,255,0.55);
     --glass-shadow:0 8px 32px rgba(15,31,61,0.10), 0 1.5px 0 rgba(255,255,255,0.6) inset;
+    --blob1:rgba(28,120,220,0.16);
+    --blob2:rgba(200,29,37,0.14);
+    --blob3:rgba(26,156,91,0.10);
+    --card-blur:blur(18px) saturate(160%);
+    --panel-blur:blur(20px) saturate(160%);
+  }
+  /* ---- Theme variants ---------------------------------------------------
+     Status/semantic colors (--green/--amber/--accent) never change between
+     themes: they mean "oficial / pendente / não testado" everywhere in the
+     app (badges, donut, tables), so keeping them fixed means a theme is
+     purely cosmetic and never changes what a color means on screen.
+     Scoped to @media screen so a printed report always uses the Clássico
+     (light) palette regardless of which theme is selected on screen. */
+  @media screen{
+    html[data-theme="dark"]{
+      --navy:#0a1226; --navy-light:#172a52;
+      --bg:#0a0e1a; --card:#141b30; --text:#e9edf8; --muted:#92a0c6; --border:rgba(255,255,255,0.08);
+      --glass-bg:rgba(20,28,50,0.55); --glass-border:rgba(255,255,255,0.10);
+      --glass-shadow:0 8px 32px rgba(0,0,0,0.5), 0 1.5px 0 rgba(255,255,255,0.05) inset;
+      --blob1:rgba(28,120,220,0.26); --blob2:rgba(255,59,78,0.20); --blob3:rgba(10,217,126,0.18);
+    }
+    html[data-theme="aurora"]{
+      --navy:#241546; --navy-light:#4a2b86;
+      --bg:#f6f1ff; --card:#ffffff; --text:#241a3d; --muted:#766a9b; --border:#e7ddf8;
+      --glass-bg:rgba(255,255,255,0.52); --glass-border:rgba(255,255,255,0.65);
+      --glass-shadow:0 8px 34px rgba(90,40,180,0.18), 0 1.5px 0 rgba(255,255,255,0.7) inset;
+      --blob1:rgba(140,70,230,0.24); --blob2:rgba(255,60,150,0.20); --blob3:rgba(10,205,190,0.18);
+    }
+    html[data-theme="minimal"]{
+      --navy:#14161c; --navy-light:#2b2f3a;
+      --bg:#fafafa; --card:#ffffff; --text:#15171c; --muted:#767b87; --border:#e7e8ec;
+      --glass-bg:#ffffff; --glass-border:#e7e8ec;
+      --glass-shadow:0 1px 3px rgba(0,0,0,0.06);
+      --blob1:transparent; --blob2:transparent; --blob3:transparent;
+      --card-blur:none; --panel-blur:none;
+    }
+    html[data-theme="minimal"] #seg-official, html[data-theme="minimal"] #rSegOfficial,
+    html[data-theme="minimal"] #seg-tested, html[data-theme="minimal"] #rSegTested,
+    html[data-theme="minimal"] #seg-nottested, html[data-theme="minimal"] #rSegNotTested{
+      filter:none !important;
+    }
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
     background:
-      radial-gradient(900px 500px at 8% -5%, rgba(28,120,220,0.16), transparent 60%),
-      radial-gradient(800px 480px at 95% 10%, rgba(200,29,37,0.14), transparent 55%),
-      radial-gradient(1000px 700px at 50% 100%, rgba(26,156,91,0.10), transparent 60%),
+      radial-gradient(900px 500px at 8% -5%, var(--blob1), transparent 60%),
+      radial-gradient(800px 480px at 95% 10%, var(--blob2), transparent 55%),
+      radial-gradient(1000px 700px at 50% 100%, var(--blob3), transparent 60%),
       var(--bg);
     background-attachment:fixed;
     min-height:100vh;
+    transition:background-color .25s ease, color .25s ease;
   }
   .sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;
     background:linear-gradient(180deg,#0b1730 0%,var(--navy) 50%,var(--navy-light) 100%);
@@ -51,6 +103,25 @@
   .sidebar .tab-btn.active .count{background:var(--border);color:var(--navy);}
   .sidebar .tab-btn:hover:not(.active){background:rgba(255,255,255,0.1);color:#fff;}
   .main-col{margin-left:280px;}
+
+  /* Theme switcher */
+  .theme-wrap{position:relative;margin-top:10px;}
+  .theme-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#dce5f5;
+    font:inherit;font-weight:600;font-size:13.5px;padding:11px 14px;cursor:pointer;border-radius:12px;text-align:left;width:100%;white-space:nowrap;}
+  .theme-btn:hover{background:rgba(255,255,255,0.16);}
+  .theme-btn .swatch-dot{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,0.25) inset;}
+  .theme-popover{position:absolute;left:0;right:0;bottom:calc(100% + 8px);background:#101a34;border:1px solid rgba(255,255,255,0.14);
+    border-radius:14px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,0.45);display:none;z-index:80;}
+  .theme-popover.open{display:block;}
+  .theme-popover .th-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8d9ac0;font-weight:700;padding:2px 6px 8px;}
+  .theme-opt{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;border-radius:10px;padding:9px 8px;cursor:pointer;text-align:left;}
+  .theme-opt:hover{background:rgba(255,255,255,0.08);}
+  .theme-opt.active{background:rgba(255,255,255,0.12);}
+  .theme-opt .swatch{width:26px;height:26px;border-radius:50%;flex:none;border:2px solid rgba(255,255,255,0.25);}
+  .theme-opt .th-name{color:#e8edf7;font-size:13.5px;font-weight:600;}
+  .theme-opt .th-desc{color:#8d9ac0;font-size:10.5px;margin-top:1px;}
+  .theme-opt .th-check{margin-left:auto;color:#18e08a;font-size:15px;opacity:0;}
+  .theme-opt.active .th-check{opacity:1;}
   @media (max-width:900px){
     .sidebar{position:static;width:auto;height:auto;flex-direction:row;align-items:center;overflow-x:auto;padding:14px 16px;}
     .sidebar-logo{margin:0 14px 0 0;}
@@ -93,7 +164,7 @@
   #tab-overview > .cards{position:sticky;top:0;z-index:25;
     background:rgba(242,244,249,0.94);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);
     padding:14px 0 10px;box-shadow:0 10px 24px rgba(15,31,61,0.07);}
-  .card{background:var(--glass-bg);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid var(--glass-border);border-radius:16px;padding:18px 20px;box-shadow:var(--glass-shadow);transition:transform .15s ease;}
+  .card{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:16px;padding:18px 20px;box-shadow:var(--glass-shadow);transition:transform .15s ease, background-color .25s ease;}
   .card:hover{transform:translateY(-2px);}
   .card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;font-weight:600;}
   .card .value{font-size:28px;font-weight:700;}
@@ -102,9 +173,9 @@
   .card.amber .value{color:var(--amber);}
   .card.red .value{color:var(--accent);}
 
-  section.panel{background:var(--glass-bg);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid var(--glass-border);border-radius:20px;padding:24px 26px;margin-bottom:22px;box-shadow:var(--glass-shadow);}
+  section.panel{background:var(--glass-bg);backdrop-filter:var(--panel-blur);-webkit-backdrop-filter:var(--panel-blur);border:1px solid var(--glass-border);border-radius:20px;padding:24px 26px;margin-bottom:22px;box-shadow:var(--glass-shadow);}
   section.panel h2{margin:0 0 4px;font-size:18px;}
-  section.panel h3{margin:22px 0 10px;font-size:14.5px;color:var(--navy);display:flex;align-items:center;gap:8px;}
+  section.panel h3{margin:22px 0 10px;font-size:14.5px;color:var(--text);display:flex;align-items:center;gap:8px;}
   section.panel .hint{font-size:12.5px;color:var(--muted);margin:0 0 18px;}
 
   .chart-row{display:grid;grid-template-columns:280px 1fr;gap:36px;align-items:center;}
@@ -112,7 +183,7 @@
   .donut-wrap{position:relative;width:240px;height:240px;margin:0 auto;}
   .donut-wrap svg{transform:rotate(-90deg);}
   .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .donut-center .pct{font-size:40px;font-weight:800;color:var(--navy);line-height:1;}
+  .donut-center .pct{font-size:40px;font-weight:800;color:var(--text);line-height:1;}
   .donut-center .lbl{font-size:12px;color:var(--muted);margin-top:4px;text-align:center;max-width:140px;}
 
   /* Vivid, flat (non-gradient) donut ring colors with a soft neon glow on screen.
@@ -175,7 +246,7 @@
   .r-topband{height:6px;border-radius:4px;margin:14px 0 18px;
     background:linear-gradient(90deg,var(--navy) 0 62%, var(--green) 62% 76%, var(--amber) 76% 88%, var(--accent) 88% 100%);}
   .r-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
-  .r-kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 16px;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(15,31,61,0.06);}
+  .r-kpi{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:12px;padding:12px 16px;position:relative;overflow:hidden;box-shadow:var(--glass-shadow);transition:background-color .25s ease;}
   .r-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;}
   .r-kpi.navy::before{background:var(--navy);}
   .r-kpi.green::before{background:var(--green);}
@@ -185,9 +256,9 @@
   .r-kpi .val{font-size:24px;font-weight:800;color:var(--text);margin-top:2px;line-height:1.1;}
   .r-kpi .sub{font-size:11px;color:var(--muted);margin-top:2px;}
   .r-charts-row{display:grid;grid-template-columns:0.8fr 1.3fr;gap:18px;align-items:center;margin-bottom:20px;}
-  .r-donut-card, .r-timeline-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;}
+  .r-donut-card, .r-timeline-card{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--glass-shadow);transition:background-color .25s ease;}
   .r-timeline-card img{width:100%;height:auto;display:block;}
-  .r-section-title{font-size:15px;font-weight:700;color:var(--navy);margin:18px 0 8px;}
+  .r-section-title{font-size:15px;font-weight:700;color:var(--text);margin:18px 0 8px;}
   .r-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;}
   .r-table th{background:var(--navy);color:#fff;text-align:left;padding:6px 9px;font-size:10px;text-transform:uppercase;letter-spacing:.02em;}
   .r-table td{padding:6px 9px;border-bottom:1px solid var(--border);}
@@ -288,6 +359,32 @@
   <button class="tab-btn" data-tab="finalizados">Finalizados <span class="count" id="countFin">—</span></button>
   <button class="tab-btn" data-tab="erros">Erros <span class="count" id="countErr">—</span></button>
   <div class="sidebar-spacer"></div>
+  <div class="theme-wrap">
+    <div class="theme-popover" id="themePopover">
+      <div class="th-title">Tema do site</div>
+      <button class="theme-opt" type="button" data-theme="classic">
+        <span class="swatch" style="background:linear-gradient(135deg,#0f1f3d,#c81d25);"></span>
+        <span><span class="th-name" style="display:block;">Clássico BYD</span><span class="th-desc">Marinho &amp; vermelho, visual atual</span></span>
+        <span class="th-check">✓</span>
+      </button>
+      <button class="theme-opt" type="button" data-theme="dark">
+        <span class="swatch" style="background:linear-gradient(135deg,#0a1226,#18e08a);"></span>
+        <span><span class="th-name" style="display:block;">Modo Escuro</span><span class="th-desc">Dark mode com acentos neon</span></span>
+        <span class="th-check">✓</span>
+      </button>
+      <button class="theme-opt" type="button" data-theme="aurora">
+        <span class="swatch" style="background:linear-gradient(135deg,#8c46e6,#ff3c96,#0acdbe);"></span>
+        <span><span class="th-name" style="display:block;">Aurora</span><span class="th-desc">Gradiente vibrante + glass</span></span>
+        <span class="th-check">✓</span>
+      </button>
+      <button class="theme-opt" type="button" data-theme="minimal">
+        <span class="swatch" style="background:linear-gradient(135deg,#fafafa,#14161c);"></span>
+        <span><span class="th-name" style="display:block;">Minimalista</span><span class="th-desc">Clean, sem efeitos</span></span>
+        <span class="th-check">✓</span>
+      </button>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button"><span class="swatch-dot" id="themeBtnDot" style="background:linear-gradient(135deg,#0f1f3d,#c81d25);"></span>🎨&nbsp; Tema: <span id="themeBtnLabel">Clássico BYD</span></button>
+  </div>
   <button class="tab-btn print-btn" id="printStatusBtn" type="button">🖨️&nbsp; Imprimir Status (PDF)</button>
 </aside>
 
@@ -676,7 +773,7 @@ function updateOverview(){
       <div class="legend-bar-bg"><div class="legend-bar-fg" style="width:${Math.round(pctNotTested*100)}%;background:linear-gradient(90deg,#e0454c,#a81017);"></div></div>
     </div>
     <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px;display:flex;justify-content:space-between;font-size:13px;color:var(--muted);">
-      <span>Faltam para 100%</span><b style="color:var(--navy);">${total-official} atividades (${Math.round((1-pctOfficial)*100)}%)</b>
+      <span>Faltam para 100%</span><b style="color:var(--text);">${total-official} atividades (${Math.round((1-pctOfficial)*100)}%)</b>
     </div>
   `;
 
@@ -924,7 +1021,53 @@ function initBadgeTilt(){
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => { init(); initBadgeTilt(); });
+document.addEventListener('DOMContentLoaded', () => { init(); initBadgeTilt(); initTheme(); });
+
+// ---- Theme switcher ---------------------------------------------------
+const THEME_INFO = {
+  classic: {label:'Clássico BYD', dot:'linear-gradient(135deg,#0f1f3d,#c81d25)'},
+  dark:    {label:'Modo Escuro',  dot:'linear-gradient(135deg,#0a1226,#18e08a)'},
+  aurora:  {label:'Aurora',       dot:'linear-gradient(135deg,#8c46e6,#ff3c96,#0acdbe)'},
+  minimal: {label:'Minimalista',  dot:'linear-gradient(135deg,#fafafa,#14161c)'}
+};
+function applyTheme(name){
+  if(!THEME_INFO[name]) name = 'classic';
+  document.documentElement.setAttribute('data-theme', name === 'classic' ? '' : name);
+  const info = THEME_INFO[name];
+  const dot = document.getElementById('themeBtnDot');
+  const label = document.getElementById('themeBtnLabel');
+  if(dot) dot.style.background = info.dot;
+  if(label) label.textContent = info.label;
+  document.querySelectorAll('.theme-opt').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.theme === name);
+  });
+  try{ localStorage.setItem('wmsTheme', name); }catch(err){}
+}
+function initTheme(){
+  let saved = 'classic';
+  try{ saved = localStorage.getItem('wmsTheme') || 'classic'; }catch(err){}
+  applyTheme(saved);
+
+  const themeBtn = document.getElementById('themeBtn');
+  const popover = document.getElementById('themePopover');
+  if(themeBtn && popover){
+    themeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      popover.classList.toggle('open');
+    });
+    popover.querySelectorAll('.theme-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        applyTheme(btn.dataset.theme);
+        popover.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', (e)=>{
+      if(!popover.contains(e.target) && e.target !== themeBtn){
+        popover.classList.remove('open');
+      }
+    });
+  }
+}
 </script>
 </body>
 </html>
