@@ -249,6 +249,8 @@
   input[type=text]:hover, input[type=date]:hover, select:hover{border-color:#9aa6c2;}
   input[type=text]:focus, input[type=date]:focus, select:focus{outline:none;border-color:var(--navy-light);box-shadow:0 0 0 3px rgba(31,58,110,0.18);background:#ffffff;}
   input[type=text]::placeholder{color:#9aa3b5;}
+  input[readonly]{background:rgba(127,133,145,0.12);color:var(--muted);cursor:not-allowed;box-shadow:none;}
+  input[readonly]:hover, input[readonly]:focus{border-color:#c2cadb;box-shadow:none;}
   select.status-select{font-weight:700;cursor:pointer;}
   input[type=checkbox]{width:19px;height:19px;accent-color:var(--green);cursor:pointer;}
   .proc-name{font-weight:600;min-width:200px;}
@@ -659,9 +661,9 @@ function rowHtml(a){
   return `
     <tr data-id="${a.id}">
       <td><input type="checkbox" class="official-cb" data-id="${a.id}" ${a.official ? 'checked' : ''}></td>
-      <td class="proc-name">${escapeHtml(a.processo)}</td>
+      <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
       <td><select class="status-select ${a.informalStatus==='OK' ? 'pill ok' : 'pill nao'}" data-id="${a.id}" style="background:${a.informalStatus==='OK' ? 'linear-gradient(135deg,#1a9c5b,#2ec27e)' : 'linear-gradient(135deg,#c81d25,#e0454c)'};color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);border-radius:999px;padding:4px 10px;font-size:11.5px;width:auto;"><option value="OK" ${a.informalStatus==='OK' ? 'selected' : ''}>OK</option><option value="NAO" ${a.informalStatus!=='OK' ? 'selected' : ''}>${t.statusNao}</option></select></td>
-      <td><input type="text" class="obs-input" data-id="${a.id}" value="${escapeHtml(a.observacao)}"></td>
+      <td>${obsInputHtml(a)}</td>
       <td><input type="text" class="colab-input" data-id="${a.id}" value="${escapeHtml(a.colaborador)}"></td>
       <td><input type="text" class="suporte-input" data-id="${a.id}" value="${escapeHtml(a.responsavelSistema)}"></td>
       <td><input type="text" class="plano-input" data-id="${a.id}" placeholder="${t.aDefinir}" value="${escapeHtml(a.planoAcao)}"></td>
@@ -688,9 +690,9 @@ function renderActivities(){
     ? official.map(a => `
         <tr data-id="${a.id}">
           <td><input type="checkbox" class="official-cb" data-id="${a.id}" checked></td>
-          <td class="proc-name">${escapeHtml(a.processo)}</td>
+          <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
           <td>${fmtDate(a.completedAt)}</td>
-          <td><input type="text" class="obs-input" data-id="${a.id}" value="${escapeHtml(a.observacao)}"></td>
+          <td>${obsInputHtml(a)}</td>
           <td><input type="text" class="colab-input" data-id="${a.id}" value="${escapeHtml(a.colaborador)}"></td>
           <td><input type="text" class="suporte-input" data-id="${a.id}" value="${escapeHtml(a.responsavelSistema)}"></td>
         </tr>`).join('')
@@ -789,6 +791,7 @@ const I18N = {
     gridData:'Data', gridErro:'Erro', gridCausa:'Causa', gridPlano:'Plano de ação', gridResp:'Responsável', gridStatus:'Status',
     labelFixed:'Corrigido', labelProgress:'Em andamento', labelPending:'Pendente',
     printStatusHeaderTitle:'Implementação WMS — Relatório de Status',
+    notesReadonlyHint:'Traduzido para revisão — mude para PT para editar',
     printStatusHeaderMeta:(dateStr,pct)=>`Gerado em ${dateStr} · Progresso oficial concluído: ${pct} · Logística e Produção`
   },
   en: {
@@ -875,9 +878,56 @@ const I18N = {
     gridData:'Date', gridErro:'Error', gridCausa:'Cause', gridPlano:'Action plan', gridResp:'Responsible', gridStatus:'Status',
     labelFixed:'Fixed', labelProgress:'In progress', labelPending:'Pending',
     printStatusHeaderTitle:'WMS Implementation — Status Report',
+    notesReadonlyHint:'Translated for review — switch to PT to edit',
     printStatusHeaderMeta:(dateStr,pct)=>`Generated on ${dateStr} · Official progress completed: ${pct} · Logistics and Production`
   }
 };
+
+// ---- Activity-name / notes translation (display only) ------------------
+// Keyed by the exact Portuguese text currently stored in Supabase. Falls
+// back to the original text when no match exists (e.g. a newly added
+// activity not yet in this list), so nothing breaks for future entries.
+const ACTIVITY_I18N = {
+  'Transferência 311 para linha de produção DEP 7000': 'Transfer 311 to DEP 7000 Production Line',
+  'Ordem Produção 261 baixa': 'Production Order 261 Write-off',
+  'Ajuste de Estoque': 'Inventory Adjustment',
+  'Transferência Filiais 861': 'Branch Transfer 861',
+  'Transferência Filiais 862': 'Branch Transfer 862',
+  'Armazenamento de Materiais': 'Material Storage',
+  'Recebimento Mercadoria OSGT': 'OSGT Goods Receipt',
+  'Transferência Terceiros Z48': 'Third-Party Transfer Z48',
+  'Transferência Terceiros Z49': 'Third-Party Transfer Z49',
+  'Consulta de Estoque': 'Inventory Lookup',
+  'Criar Novos Usuários': 'Create New Users',
+  'Mudança de Locação': 'Location Change',
+  'Criação de Bin Code (Endereço)': 'Bin Code Creation (Address)',
+  'Criar Etiquetas': 'Create Labels',
+  'Criar Itens Ativos (Z46)': 'Create Active Items (Z46)',
+  'Comparação WMS e SAP': 'WMS vs SAP Comparison',
+  'Uso dos Coletores (PDA)': 'Use of Handheld Scanners (PDA)'
+};
+const NOTES_I18N = {
+  'Necessário realizar mais testes desse tipo de movimentação.': 'More testing is needed for this type of movement.',
+  'Treinamento ainda não realizado': 'Training not yet completed',
+  'Em execução': 'In progress',
+  'Passar as informações aos colaboradores.': 'Share the information with the team.',
+  'Passar as informações aos colaboradores responsáveis por essa atribuição.': 'Share the information with the team members responsible for this task.',
+  'É preciso realizar mais testes dessa operação com o uso dos coletores e definir quem serão as pessoas designadas para o uso.': 'More testing is needed for this operation using the handheld scanners, and the designated users still need to be determined.'
+};
+function trActivity(name){
+  return (appLang === 'en' && ACTIVITY_I18N[name]) ? ACTIVITY_I18N[name] : name;
+}
+function trNotes(text){
+  return (appLang === 'en' && NOTES_I18N[text]) ? NOTES_I18N[text] : text;
+}
+// Renders the notes <input>: translated + read-only in EN (when a
+// translation exists) so a stray edit can never overwrite the Portuguese
+// original in Supabase with English text. Editable again back in PT.
+function obsInputHtml(a){
+  const translated = trNotes(a.observacao);
+  const isTranslated = appLang === 'en' && translated !== a.observacao;
+  return `<input type="text" class="obs-input" data-id="${a.id}" value="${escapeHtml(translated)}"${isTranslated ? ' readonly title="' + (I18N.en.notesReadonlyHint) + '"' : ''}>`;
+}
 let appLang = 'pt';
 try{ appLang = localStorage.getItem('wmsAppLang') || 'pt'; }catch(err){}
 
@@ -1036,10 +1086,10 @@ function renderResumo(){
   document.getElementById('rOpenItemsBody').innerHTML = notOfficial.length
     ? notOfficial.map(a => `
         <tr>
-          <td class="proc-name">${escapeHtml(a.processo)}</td>
+          <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
           <td class="${statusClass(a)}">${statusLabel(a)}</td>
           <td>${escapeHtml(a.colaborador) || '—'}</td>
-          <td>${escapeHtml(a.observacao)}</td>
+          <td>${escapeHtml(trNotes(a.observacao))}</td>
           <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(a.planoAcao) : t.aDefinir}</td>
         </tr>`).join('')
     : `<tr><td colspan="5" class="empty">${t.emptyPending}</td></tr>`;
@@ -1047,7 +1097,7 @@ function renderResumo(){
   document.getElementById('rCompletedBody').innerHTML = official.length
     ? official.map(a => `
         <tr>
-          <td class="proc-name">${escapeHtml(a.processo)}</td>
+          <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
           <td>${escapeHtml(a.colaborador) || '—'}</td>
           <td>${fmtDate(a.completedAt)}</td>
         </tr>`).join('')
@@ -1140,7 +1190,7 @@ function updateOverview(){
       const colabTxt = (a.colaborador || '').trim();
       return `
         <div class="breakdown-row">
-          <div class="name">${escapeHtml(a.processo)}${colabTxt ? `<br><span style="font-weight:400;color:var(--muted);font-size:11.5px;">${escapeHtml(colabTxt)}</span>` : ''}</div>
+          <div class="name">${escapeHtml(trActivity(a.processo))}${colabTxt ? `<br><span style="font-weight:400;color:var(--muted);font-size:11.5px;">${escapeHtml(colabTxt)}</span>` : ''}</div>
           <div class="bar-bg"><div class="bar-fg" style="width:${pct}%;background:${color};"></div></div>
           <div class="bcount"><span class="pill" style="background:linear-gradient(135deg, ${color}, ${color}cc);color:#fff;box-shadow:0 2px 8px ${color}55;">${label}</span></div>
         </div>`;
