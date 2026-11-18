@@ -76,6 +76,22 @@
     html[data-theme="minimal"] #seg-nottested, html[data-theme="minimal"] #rSegNotTested{
       filter:none !important;
     }
+    html[data-theme="graphite"]{
+      --navy:#1c2128; --navy-light:#2d333d;
+      --bg:#16181d; --card:#1f2329; --text:#e6e8eb; --muted:#8b92a0; --border:rgba(255,255,255,0.07);
+      --glass-bg:rgba(26,32,40,0.70); --glass-border:rgba(255,255,255,0.09);
+      --glass-shadow:0 8px 32px rgba(0,0,0,0.45), 0 1.5px 0 rgba(255,255,255,0.05) inset;
+      --blob1:rgba(56,189,182,0.22); --blob2:rgba(99,102,241,0.18); --blob3:rgba(148,163,184,0.14);
+      --card-blur:blur(18px) saturate(160%); --panel-blur:blur(20px) saturate(160%);
+    }
+    html[data-theme="sand"]{
+      --navy:#332b22; --navy-light:#5c4f3d;
+      --bg:#f7f3ec; --card:#fffdf9; --text:#332b22; --muted:#8a7e6c; --border:#e8e0d2;
+      --glass-bg:rgba(255,253,249,0.6); --glass-border:rgba(255,255,255,0.7);
+      --glass-shadow:0 8px 32px rgba(120,100,70,0.12), 0 1.5px 0 rgba(255,255,255,0.7) inset;
+      --blob1:rgba(140,160,120,0.16); --blob2:rgba(200,130,90,0.14); --blob3:rgba(210,180,120,0.12);
+      --card-blur:blur(18px) saturate(150%); --panel-blur:blur(20px) saturate(150%);
+    }
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
@@ -106,10 +122,9 @@
 
   /* Theme switcher */
   .theme-wrap{position:relative;margin-top:10px;}
-  .theme-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#dce5f5;
-    font:inherit;font-weight:600;font-size:13.5px;padding:11px 14px;cursor:pointer;border-radius:12px;text-align:left;width:100%;white-space:nowrap;}
+  .theme-btn{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#dce5f5;
+    font-size:19px;line-height:1;width:42px;height:42px;padding:0;cursor:pointer;border-radius:12px;}
   .theme-btn:hover{background:rgba(255,255,255,0.16);}
-  .theme-btn .swatch-dot{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,0.25) inset;}
   .theme-popover{position:absolute;left:0;right:0;bottom:calc(100% + 8px);background:#101a34;border:1px solid rgba(255,255,255,0.14);
     border-radius:14px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,0.45);display:none;z-index:80;}
   .theme-popover.open{display:block;}
@@ -263,6 +278,11 @@
   .r-table th{background:var(--navy);color:#fff;text-align:left;padding:6px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.02em;}
   .r-table td{padding:6px 9px;border-bottom:1px solid var(--border);}
   .r-table tr:nth-child(even) td{background:#f7f9fc;}
+  .r-lang-toggle{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;}
+  .r-lang-opt{font:inherit;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted);background:transparent;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;transition:background-color .15s ease,color .15s ease;}
+  .r-lang-opt:hover{color:var(--text);}
+  .r-lang-opt.active{background:var(--navy);color:#fff;}
+  @media print{ .r-lang-toggle{display:none !important;} }
   .r-amber{color:var(--amber);font-weight:700;}
   .r-red{color:var(--accent);font-weight:700;}
   .r-muted{color:var(--muted);font-style:italic;}
@@ -382,8 +402,18 @@
         <span><span class="th-name" style="display:block;">Minimalista</span><span class="th-desc">Clean, sem efeitos</span></span>
         <span class="th-check">✓</span>
       </button>
+      <button class="theme-opt" type="button" data-theme="graphite">
+        <span class="swatch" style="background:linear-gradient(135deg,#2d333d,#38bdb6);"></span>
+        <span><span class="th-name" style="display:block;">Grafite</span><span class="th-desc">Cinza-grafite moderno + glass</span></span>
+        <span class="th-check">✓</span>
+      </button>
+      <button class="theme-opt" type="button" data-theme="sand">
+        <span class="swatch" style="background:linear-gradient(135deg,#e8ddc8,#c88a5a);"></span>
+        <span><span class="th-name" style="display:block;">Areia</span><span class="th-desc">Neutro quente, elegante + glass</span></span>
+        <span class="th-check">✓</span>
+      </button>
     </div>
-    <button class="theme-btn" id="themeBtn" type="button"><span class="swatch-dot" id="themeBtnDot" style="background:linear-gradient(135deg,#0f1f3d,#c81d25);"></span>🎨&nbsp; Tema: <span id="themeBtnLabel">Clássico BYD</span></button>
+    <button class="theme-btn" id="themeBtn" type="button" title="Tema do site" aria-label="Tema do site">🎨</button>
   </div>
   <button class="tab-btn print-btn" id="printStatusBtn" type="button">🖨️&nbsp; Imprimir Status (PDF)</button>
 </aside>
@@ -443,19 +473,25 @@
     <section class="panel r-wrap">
       <div class="r-panel-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
         <div>
-          <h2 style="margin-bottom:2px;">Resumo Geral — Implementação WMS</h2>
-          <p class="hint" style="margin-bottom:0;">Visão consolidada de uma página, pronta para impressão e compartilhamento.</p>
+          <h2 style="margin-bottom:2px;" id="rMainTitle">Resumo Geral — Implementação WMS</h2>
+          <p class="hint" style="margin-bottom:0;" id="rSubtitle">Visão consolidada de uma página, pronta para impressão e compartilhamento.</p>
         </div>
-        <button class="btn r-print-btn" id="printResumoBtn" type="button">🖨️&nbsp; Imprimir Resumo (1 página)</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="r-lang-toggle" id="rLangToggle">
+            <button type="button" class="r-lang-opt active" data-lang="pt">PT</button>
+            <button type="button" class="r-lang-opt" data-lang="en">EN</button>
+          </div>
+          <button class="btn r-print-btn" id="printResumoBtn" type="button">🖨️&nbsp; <span id="rPrintBtnLabel">Imprimir Resumo</span></button>
+        </div>
       </div>
 
       <div class="r-topband"></div>
 
       <div class="r-kpis">
-        <div class="r-kpi navy"><div class="lbl">Total de atividades</div><div class="val" id="rKpiTotal">—</div></div>
-        <div class="r-kpi green"><div class="lbl">Oficialmente concluído</div><div class="val" id="rKpiOfficial">—</div><div class="sub" id="rKpiOfficialSub"></div></div>
-        <div class="r-kpi amber"><div class="lbl">Testado, não oficial</div><div class="val" id="rKpiTested">—</div><div class="sub" id="rKpiTestedSub"></div></div>
-        <div class="r-kpi red"><div class="lbl">Não testado</div><div class="val" id="rKpiNotTested">—</div><div class="sub" id="rKpiNotTestedSub"></div></div>
+        <div class="r-kpi navy"><div class="lbl" id="rLblTotal">Total de atividades</div><div class="val" id="rKpiTotal">—</div></div>
+        <div class="r-kpi green"><div class="lbl" id="rLblOfficial">Oficialmente concluído</div><div class="val" id="rKpiOfficial">—</div><div class="sub" id="rKpiOfficialSub"></div></div>
+        <div class="r-kpi amber"><div class="lbl" id="rLblTested">Testado, não oficial</div><div class="val" id="rKpiTested">—</div><div class="sub" id="rKpiTestedSub"></div></div>
+        <div class="r-kpi red"><div class="lbl" id="rLblNotTested">Não testado</div><div class="val" id="rKpiNotTested">—</div><div class="sub" id="rKpiNotTestedSub"></div></div>
       </div>
 
       <div class="r-charts-row">
@@ -469,7 +505,7 @@
             </svg>
             <div class="donut-center">
               <span class="pct" id="rDonutPct" style="font-size:40px;">0%</span>
-              <span class="lbl" style="font-size:12px;">concluído oficialmente</span>
+              <span class="lbl" id="rDonutLbl" style="font-size:12px;">concluído oficialmente</span>
             </div>
           </div>
         </div>
@@ -478,18 +514,18 @@
         </div>
       </div>
 
-      <h3 class="r-section-title">Itens Pendentes (<span id="rOpenCount">—</span>)</h3>
+      <h3 class="r-section-title"><span id="rPendingTitleText">Itens Pendentes</span> (<span id="rOpenCount">—</span>)</h3>
       <div style="overflow-x:auto;">
       <table class="r-table">
-        <thead><tr><th>Processo</th><th>Status</th><th>Colaborador</th><th>Notas</th><th>Plano de Ação</th></tr></thead>
+        <thead><tr><th id="rTh1">Processo</th><th id="rTh2">Status</th><th id="rTh3">Colaborador</th><th id="rTh4">Notas</th><th id="rTh5">Plano de Ação</th></tr></thead>
         <tbody id="rOpenItemsBody"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
       </table>
       </div>
 
-      <h3 class="r-section-title">Oficialmente Concluído (<span id="rDoneCount">—</span>)</h3>
+      <h3 class="r-section-title"><span id="rDoneTitleText">Oficialmente Concluído</span> (<span id="rDoneCount">—</span>)</h3>
       <div style="overflow-x:auto;">
       <table class="r-table">
-        <thead><tr><th>Processo</th><th>Colaborador</th><th>Concluído em</th></tr></thead>
+        <thead><tr><th id="rTh6">Processo</th><th id="rTh7">Colaborador</th><th id="rTh8">Concluído em</th></tr></thead>
         <tbody id="rCompletedBody"><tr><td colspan="3" class="empty">Carregando...</td></tr></tbody>
       </table>
       </div>
@@ -562,7 +598,7 @@
     </section>
   </section>
 
-  <p class="footer-note">Dados salvos automaticamente · Relatório diário em PDF enviado às 9h30 (horário de Brasília) ao gestor</p>
+  <p class="footer-note" id="rFooterNote">Dados salvos automaticamente · Relatório diário em PDF enviado às 9h30 (horário de Brasília) ao gestor</p>
 </div>
 </div>
 
@@ -652,7 +688,90 @@ function renderActivities(){
   renderResumo();
 }
 
+// ---- Resumo language toggle (PT/EN) ------------------------------------
+const RESUMO_I18N = {
+  pt: {
+    mainTitle:'Resumo Geral — Implementação WMS',
+    subtitle:'Visão consolidada de uma página, pronta para impressão e compartilhamento.',
+    printBtn:'Imprimir Resumo',
+    lblTotal:'Total de atividades',
+    lblOfficial:'Oficialmente concluído',
+    lblTested:'Testado, não oficial',
+    lblNotTested:'Não testado',
+    ofTotal:'% do total',
+    donutLbl:'concluído oficialmente',
+    pendingTitle:'Itens Pendentes',
+    doneTitle:'Oficialmente Concluído',
+    th:['Processo','Status','Colaborador','Notas','Plano de Ação','Processo','Colaborador','Concluído em'],
+    statusPending:'Pendente Validação',
+    statusNotTested:'Não Testado',
+    aDefinir:'A definir',
+    emptyPending:'Nenhum item pendente.',
+    emptyDone:'Nenhuma atividade concluída ainda.',
+    footer:'Dados salvos automaticamente · Relatório diário em PDF enviado às 9h30 (horário de Brasília) ao gestor',
+    printHeaderTitle:'Resumo Geral — Implementação WMS',
+    printHeaderMeta:(dateStr,pct)=>`Gerado em ${dateStr} · Progresso oficial concluído: ${pct} · Logística e Produção`,
+    locale:'pt-BR'
+  },
+  en: {
+    mainTitle:'Overall Summary — WMS Implementation',
+    subtitle:'One-page consolidated view, ready for printing and sharing.',
+    printBtn:'Print Summary',
+    lblTotal:'Total activities',
+    lblOfficial:'Officially completed',
+    lblTested:'Tested, not official',
+    lblNotTested:'Not tested',
+    ofTotal:'% of total',
+    donutLbl:'officially completed',
+    pendingTitle:'Pending Items',
+    doneTitle:'Officially Completed',
+    th:['Process','Status','Collaborator','Notes','Action Plan','Process','Collaborator','Completed On'],
+    statusPending:'Pending Validation',
+    statusNotTested:'Not Tested',
+    aDefinir:'To be defined',
+    emptyPending:'No pending items.',
+    emptyDone:'No activities completed yet.',
+    footer:'Data saved automatically · Daily PDF report sent at 9:30 AM (Brasília time) to the manager',
+    printHeaderTitle:'Overall Summary — WMS Implementation',
+    printHeaderMeta:(dateStr,pct)=>`Generated on ${dateStr} · Official progress completed: ${pct} · Logistics and Production`,
+    locale:'en-US'
+  }
+};
+let resumoLang = 'pt';
+try{ resumoLang = localStorage.getItem('wmsResumoLang') || 'pt'; }catch(err){}
+
+function applyResumoLang(lang){
+  if(!RESUMO_I18N[lang]) lang = 'pt';
+  resumoLang = lang;
+  const t = RESUMO_I18N[lang];
+  const set = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+  set('rMainTitle', t.mainTitle);
+  set('rSubtitle', t.subtitle);
+  set('rPrintBtnLabel', t.printBtn);
+  set('rLblTotal', t.lblTotal);
+  set('rLblOfficial', t.lblOfficial);
+  set('rLblTested', t.lblTested);
+  set('rLblNotTested', t.lblNotTested);
+  set('rDonutLbl', t.donutLbl);
+  set('rPendingTitleText', t.pendingTitle);
+  set('rDoneTitleText', t.doneTitle);
+  t.th.forEach((txt,i)=> set('rTh'+(i+1), txt));
+  set('rFooterNote', t.footer);
+  document.querySelectorAll('.r-lang-opt').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  try{ localStorage.setItem('wmsResumoLang', lang); }catch(err){}
+  if(typeof activities !== 'undefined' && activities.length) renderResumo();
+}
+function initResumoLang(){
+  applyResumoLang(resumoLang);
+  document.querySelectorAll('.r-lang-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=> applyResumoLang(btn.dataset.lang));
+  });
+}
+
 function renderResumo(){
+  const t = RESUMO_I18N[resumoLang] || RESUMO_I18N.pt;
   const sorted = [...activities].sort((a,b)=>(a.order??0)-(b.order??0));
   const official = sorted.filter(a => a.official);
   const notOfficial = sorted.filter(a => !a.official);
@@ -665,11 +784,11 @@ function renderResumo(){
 
   document.getElementById('rKpiTotal').textContent = total;
   document.getElementById('rKpiOfficial').textContent = official.length;
-  document.getElementById('rKpiOfficialSub').textContent = total ? Math.round(pctOfficial*100)+'% do total' : '';
+  document.getElementById('rKpiOfficialSub').textContent = total ? Math.round(pctOfficial*100)+t.ofTotal : '';
   document.getElementById('rKpiTested').textContent = tested.length;
-  document.getElementById('rKpiTestedSub').textContent = total ? Math.round(pctTested*100)+'% do total' : '';
+  document.getElementById('rKpiTestedSub').textContent = total ? Math.round(pctTested*100)+t.ofTotal : '';
   document.getElementById('rKpiNotTested').textContent = notTested.length;
-  document.getElementById('rKpiNotTestedSub').textContent = total ? Math.round(pctNotTested*100)+'% do total' : '';
+  document.getElementById('rKpiNotTestedSub').textContent = total ? Math.round(pctNotTested*100)+t.ofTotal : '';
 
   const segO = document.getElementById('rSegOfficial');
   const segT = document.getElementById('rSegTested');
@@ -683,7 +802,7 @@ function renderResumo(){
   segN.setAttribute('stroke-dashoffset', `${-(lenO+lenT)}`);
   document.getElementById('rDonutPct').textContent = Math.round(pctOfficial*100) + '%';
 
-  const statusLabel = a => a.informalStatus === 'OK' ? 'Pendente Validação' : 'Não Testado';
+  const statusLabel = a => a.informalStatus === 'OK' ? t.statusPending : t.statusNotTested;
   const statusClass = a => a.informalStatus === 'OK' ? 'r-amber' : 'r-red';
   document.getElementById('rOpenItemsBody').innerHTML = notOfficial.length
     ? notOfficial.map(a => `
@@ -692,9 +811,9 @@ function renderResumo(){
           <td class="${statusClass(a)}">${statusLabel(a)}</td>
           <td>${escapeHtml(a.colaborador) || '—'}</td>
           <td>${escapeHtml(a.observacao)}</td>
-          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(a.planoAcao) : 'A definir'}</td>
+          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(a.planoAcao) : t.aDefinir}</td>
         </tr>`).join('')
-    : '<tr><td colspan="5" class="empty">Nenhum item pendente.</td></tr>';
+    : `<tr><td colspan="5" class="empty">${t.emptyPending}</td></tr>`;
 
   document.getElementById('rCompletedBody').innerHTML = official.length
     ? official.map(a => `
@@ -703,7 +822,7 @@ function renderResumo(){
           <td>${escapeHtml(a.colaborador) || '—'}</td>
           <td>${fmtDate(a.completedAt)}</td>
         </tr>`).join('')
-    : '<tr><td colspan="3" class="empty">Nenhuma atividade concluída ainda.</td></tr>';
+    : `<tr><td colspan="3" class="empty">${t.emptyDone}</td></tr>`;
 
   document.getElementById('rOpenCount').textContent = notOfficial.length;
   document.getElementById('rDoneCount').textContent = official.length;
@@ -964,13 +1083,16 @@ async function init(){
   });
 
   document.getElementById('printResumoBtn').addEventListener('click', () => {
+    const t = RESUMO_I18N[resumoLang] || RESUMO_I18N.pt;
     const ph = document.getElementById('printHeaderResumo');
     const now = new Date();
-    const dateStr = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    const dateStr = resumoLang === 'en'
+      ? now.toLocaleDateString(t.locale) + ' at ' + now.toLocaleTimeString(t.locale, {hour:'2-digit', minute:'2-digit'})
+      : now.toLocaleDateString(t.locale) + ' às ' + now.toLocaleTimeString(t.locale, {hour:'2-digit', minute:'2-digit'});
     const pctEl = document.getElementById('rDonutPct');
     const pct = pctEl ? pctEl.textContent : '';
-    ph.innerHTML = `<h1>Resumo Geral — Implementação WMS</h1>
-      <div class="meta">Gerado em ${dateStr} · Progresso oficial concluído: ${pct} · Logística e Produção</div>`;
+    ph.innerHTML = `<h1>${t.printHeaderTitle}</h1>
+      <div class="meta">${t.printHeaderMeta(dateStr, pct)}</div>`;
     document.body.classList.add('print-resumo-only');
     window.print();
   });
@@ -1021,23 +1143,23 @@ function initBadgeTilt(){
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => { init(); initBadgeTilt(); initTheme(); });
+document.addEventListener('DOMContentLoaded', () => { init(); initBadgeTilt(); initTheme(); initResumoLang(); });
 
 // ---- Theme switcher ---------------------------------------------------
 const THEME_INFO = {
-  classic: {label:'Clássico BYD', dot:'linear-gradient(135deg,#0f1f3d,#c81d25)'},
-  dark:    {label:'Modo Escuro',  dot:'linear-gradient(135deg,#0a1226,#18e08a)'},
-  aurora:  {label:'Aurora',       dot:'linear-gradient(135deg,#8c46e6,#ff3c96,#0acdbe)'},
-  minimal: {label:'Minimalista',  dot:'linear-gradient(135deg,#fafafa,#14161c)'}
+  classic:  {label:'Clássico BYD', dot:'linear-gradient(135deg,#0f1f3d,#c81d25)'},
+  dark:     {label:'Modo Escuro',  dot:'linear-gradient(135deg,#0a1226,#18e08a)'},
+  aurora:   {label:'Aurora',       dot:'linear-gradient(135deg,#8c46e6,#ff3c96,#0acdbe)'},
+  minimal:  {label:'Minimalista',  dot:'linear-gradient(135deg,#fafafa,#14161c)'},
+  graphite: {label:'Grafite',      dot:'linear-gradient(135deg,#2d333d,#38bdb6)'},
+  sand:     {label:'Areia',        dot:'linear-gradient(135deg,#e8ddc8,#c88a5a)'}
 };
 function applyTheme(name){
   if(!THEME_INFO[name]) name = 'classic';
   document.documentElement.setAttribute('data-theme', name === 'classic' ? '' : name);
   const info = THEME_INFO[name];
-  const dot = document.getElementById('themeBtnDot');
-  const label = document.getElementById('themeBtnLabel');
-  if(dot) dot.style.background = info.dot;
-  if(label) label.textContent = info.label;
+  const btn = document.getElementById('themeBtn');
+  if(btn) btn.title = 'Tema: ' + info.label;
   document.querySelectorAll('.theme-opt').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.theme === name);
   });
