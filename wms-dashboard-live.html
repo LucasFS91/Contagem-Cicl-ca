@@ -115,6 +115,18 @@
   .donut-center .pct{font-size:40px;font-weight:800;color:var(--navy);line-height:1;}
   .donut-center .lbl{font-size:12px;color:var(--muted);margin-top:4px;text-align:center;max-width:140px;}
 
+  /* Vivid, flat (non-gradient) donut ring colors with a soft neon glow on screen.
+     Flat solid stroke colors are used instead of SVG url(#gradient) references:
+     Chrome's print/PDF pipeline can fail to resolve url(#gradient) paint-server
+     references on SVG shapes, which silently drops the color (track stays blank)
+     even though the exact same gradient renders fine on screen. A flat color set
+     directly as the stroke has nothing to resolve, so it is guaranteed to print
+     identically to how it looks on screen, in any browser. The glow below is
+     screen-only and is switched off for print further down (filter:none).  */
+  #seg-official, #rSegOfficial{filter:drop-shadow(0 0 7px rgba(10,217,126,.55)) drop-shadow(0 0 2px rgba(10,217,126,.4));}
+  #seg-tested, #rSegTested{filter:drop-shadow(0 0 7px rgba(255,171,0,.55)) drop-shadow(0 0 2px rgba(255,171,0,.4));}
+  #seg-nottested, #rSegNotTested{filter:drop-shadow(0 0 7px rgba(255,59,78,.55)) drop-shadow(0 0 2px rgba(255,59,78,.4));}
+
   .legend{display:flex;flex-direction:column;gap:12px;}
   .legend-row{display:flex;align-items:center;gap:12px;}
   .dot{width:13px;height:13px;border-radius:4px;flex:0 0 auto;}
@@ -187,13 +199,16 @@
 
   .print-header, .print-header-resumo{display:none;}
   @media print{
-    body{background:#fff !important;}
-    /* Chrome's PDF print pipeline does not paint SVG linearGradient fills/strokes
-       (they render as a faint, washed-out track). Force flat, solid brand colors
-       for the donut arcs only when printing; on screen the gradients still apply. */
-    #seg-official, #rSegOfficial{stroke:#1a9c5b !important;filter:none !important;}
-    #seg-tested, #rSegTested{stroke:#b9780a !important;filter:none !important;}
-    #seg-nottested, #rSegNotTested{stroke:#c81d25 !important;filter:none !important;}
+    body{background:#fff !important;-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important;}
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important;}
+    /* Belt-and-suspenders: the donut rings are already flat solid colors in the
+       markup itself (not SVG url(#gradient) references, which some browsers'
+       print/PDF pipelines fail to resolve), so they do not depend on this rule
+       to show color. This just reasserts the same vivid colors and strips the
+       screen-only glow, in case any other stylesheet ever touches them. */
+    #seg-official, #rSegOfficial{stroke:#0ad97e !important;filter:none !important;}
+    #seg-tested, #rSegTested{stroke:#ffab00 !important;filter:none !important;}
+    #seg-nottested, #rSegNotTested{stroke:#ff3b4e !important;filter:none !important;}
     .sidebar{display:none !important;}
     .main-col{margin-left:0 !important;}
     .wrap{padding-top:0 !important;}
@@ -296,9 +311,9 @@
         <div class="donut-wrap">
           <svg width="240" height="240" viewBox="0 0 240 240">
             <circle cx="120" cy="120" r="100" fill="none" stroke="rgba(15,31,61,0.07)" stroke-width="26"/>
-            <circle id="seg-official" cx="120" cy="120" r="100" fill="none" stroke="url(#gradOfficial)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt" filter="url(#donutShadow)"/>
-            <circle id="seg-tested" cx="120" cy="120" r="100" fill="none" stroke="url(#gradTested)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt" filter="url(#donutShadow)"/>
-            <circle id="seg-nottested" cx="120" cy="120" r="100" fill="none" stroke="url(#gradNotTested)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt" filter="url(#donutShadow)"/>
+            <circle id="seg-official" cx="120" cy="120" r="100" fill="none" stroke="#0ad97e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
+            <circle id="seg-tested" cx="120" cy="120" r="100" fill="none" stroke="#ffab00" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
+            <circle id="seg-nottested" cx="120" cy="120" r="100" fill="none" stroke="#ff3b4e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
           </svg>
           <div class="donut-center">
             <span class="pct" id="donutPct">0%</span>
@@ -351,9 +366,9 @@
           <div class="donut-wrap" style="width:170px;height:170px;">
             <svg width="170" height="170" viewBox="0 0 240 240">
               <circle cx="120" cy="120" r="100" fill="none" stroke="rgba(15,31,61,0.07)" stroke-width="26"/>
-              <circle id="rSegOfficial" cx="120" cy="120" r="100" fill="none" stroke="url(#gradOfficial)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
-              <circle id="rSegTested" cx="120" cy="120" r="100" fill="none" stroke="url(#gradTested)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
-              <circle id="rSegNotTested" cx="120" cy="120" r="100" fill="none" stroke="url(#gradNotTested)" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
+              <circle id="rSegOfficial" cx="120" cy="120" r="100" fill="none" stroke="#0ad97e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
+              <circle id="rSegTested" cx="120" cy="120" r="100" fill="none" stroke="#ffab00" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
+              <circle id="rSegNotTested" cx="120" cy="120" r="100" fill="none" stroke="#ff3b4e" stroke-width="26" stroke-dasharray="0 629" stroke-linecap="butt"/>
             </svg>
             <div class="donut-center">
               <span class="pct" id="rDonutPct" style="font-size:28px;">0%</span>
