@@ -617,8 +617,6 @@
       <button class="btn" id="addErrorBtn">+ <span id="addErrorBtnLabel">Registrar erro</span></button>
     </section>
   </section>
-
-  <p class="footer-note" id="rFooterNote">Dados salvos automaticamente · Relatório diário em PDF enviado às 9h30 (horário de Brasília) ao gestor</p>
 </div>
 </div>
 
@@ -730,7 +728,6 @@ const I18N = {
     aDefinir:'A definir',
     emptyPending:'Nenhum item pendente.',
     emptyDone:'Nenhuma atividade concluída ainda.',
-    footer:'Dados salvos automaticamente · Relatório diário em PDF enviado às 9h30 (horário de Brasília) ao gestor',
     printHeaderTitle:'Resumo Geral — Implementação WMS',
     printHeaderMeta:(dateStr,pct)=>`Gerado em ${dateStr} · Progresso oficial concluído: ${pct} · Logística e Produção`,
     locale:'pt-BR',
@@ -817,7 +814,6 @@ const I18N = {
     aDefinir:'To be defined',
     emptyPending:'No pending items.',
     emptyDone:'No activities completed yet.',
-    footer:'Data saved automatically · Daily PDF report sent at 9:30 AM (Brasília time) to the manager',
     printHeaderTitle:'Overall Summary — WMS Implementation',
     printHeaderMeta:(dateStr,pct)=>`Generated on ${dateStr} · Official progress completed: ${pct} · Logistics and Production`,
     locale:'en-US',
@@ -979,7 +975,6 @@ function applyAppLang(lang){
   set('rPendingTitleText', t.pendingTitle);
   set('rDoneTitleText', t.doneTitle);
   t.th.forEach((txt,i)=> set('rTh'+(i+1), txt));
-  set('rFooterNote', t.footer);
 
   // overview tab
   set('ovLblTotal', t.lblTotal);
