@@ -265,6 +265,9 @@
   .btn{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(15,31,61,0.25);transition:transform .12s ease, box-shadow .12s ease;}
   .btn:hover{background:linear-gradient(135deg,var(--navy-light),var(--navy));transform:translateY(-1px);box-shadow:0 6px 18px rgba(15,31,61,0.32);}
   .btn.danger{background:transparent;color:var(--accent);padding:4px 8px;font-size:16px;line-height:1;}
+  .r-pdf-btn{padding:10px 14px;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;}
+  .r-pdf-btn[disabled]{opacity:.6;cursor:default;}
+  @media print{ .r-pdf-btn{display:none !important;} }
   .add-row{display:grid;grid-template-columns:1.4fr 1fr 1.6fr 1fr auto;gap:8px;margin-top:16px;align-items:end;}
   .add-row label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;font-weight:600;}
   .footer-note{text-align:center;color:var(--muted);font-size:12px;margin-top:6px;}
@@ -519,6 +522,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <button class="btn r-print-btn" id="printResumoBtn" type="button">🖨️&nbsp; <span id="rPrintBtnLabel">Imprimir Resumo</span></button>
+          <button class="btn r-pdf-btn" id="downloadResumoPdfBtn" type="button" title="Baixar PDF do Resumo" aria-label="Baixar PDF do Resumo">📄</button>
         </div>
       </div>
 
@@ -640,6 +644,8 @@
 <div id="saveErrorToast" class="save-error-toast" role="alert"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://nyaxoazktndakcbszqcs.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55YXhvYXprdG5kYWtjYnN6cWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDEyNTksImV4cCI6MjEwNjYxNzI1OX0.jG-5xj2ZMRWS8lxj7CV0dPAEx8DD33aHLpo_DUI4wb8';
@@ -755,6 +761,8 @@ const I18N = {
     navFinalizados:'Finalizados',
     navErros:'Erros',
     navPrintStatus:'Imprimir Status (PDF)',
+    downloadPdfBtn:'Baixar PDF do Resumo',
+    downloadPdfGenerating:'Gerando PDF…',
     // ---- theme popover ----
     themeTitle:'Tema do site',
     themePrefix:'Tema: ',
@@ -840,6 +848,8 @@ const I18N = {
     navFinalizados:'Completed',
     navErros:'Errors',
     navPrintStatus:'Print Status (PDF)',
+    downloadPdfBtn:'Download Summary PDF',
+    downloadPdfGenerating:'Generating PDF…',
     // ---- theme popover ----
     themeTitle:'Site theme',
     themePrefix:'Theme: ',
@@ -963,6 +973,8 @@ function applyAppLang(lang){
   set('navErros', t.navErros);
   const printBtnEl = document.getElementById('printStatusBtn');
   if(printBtnEl){ printBtnEl.title = t.navPrintStatus; printBtnEl.setAttribute('aria-label', t.navPrintStatus); }
+  const pdfBtnEl = document.getElementById('downloadResumoPdfBtn');
+  if(pdfBtnEl && !pdfBtnEl.disabled){ pdfBtnEl.title = t.downloadPdfBtn; pdfBtnEl.setAttribute('aria-label', t.downloadPdfBtn); }
 
   // theme popover
   set('themeTitleLabel', t.themeTitle);
@@ -1265,12 +1277,12 @@ function fromDbError(r){
 }
 
 let saveErrorToastTimer = null;
-function showSaveError(){
+function showSaveError(customMsg){
   const el = document.getElementById('saveErrorToast');
   if(!el) return;
-  el.textContent = appLang === 'en'
+  el.textContent = customMsg || (appLang === 'en'
     ? 'Could not save — check your connection and try again.'
-    : 'Não foi possível salvar — verifique sua conexão e tente novamente.';
+    : 'Não foi possível salvar — verifique sua conexão e tente novamente.');
   el.classList.add('show');
   clearTimeout(saveErrorToastTimer);
   saveErrorToastTimer = setTimeout(() => el.classList.remove('show'), 5000);
@@ -1418,6 +1430,76 @@ async function init(){
   });
   window.addEventListener('afterprint', () => {
     document.body.classList.remove('print-resumo-only');
+  });
+
+  document.getElementById('downloadResumoPdfBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('downloadResumoPdfBtn');
+    if(btn.disabled) return;
+    const t = I18N[appLang] || I18N.pt;
+    const target = document.getElementById('tab-resumo');
+    const headerRow = target ? target.querySelector('.r-panel-header') : null;
+    const headerRowOriginalDisplay = headerRow ? headerRow.style.display : '';
+    const ph = document.getElementById('printHeaderResumo');
+    const originalIcon = btn.textContent;
+    const originalTitle = btn.title;
+    btn.disabled = true;
+    btn.textContent = '⏳';
+    btn.title = t.downloadPdfGenerating;
+    btn.setAttribute('aria-label', t.downloadPdfGenerating);
+
+    const now = new Date();
+    const dateStr = appLang === 'en'
+      ? now.toLocaleDateString(t.locale) + ' at ' + now.toLocaleTimeString(t.locale, {hour:'2-digit', minute:'2-digit'})
+      : now.toLocaleDateString(t.locale) + ' às ' + now.toLocaleTimeString(t.locale, {hour:'2-digit', minute:'2-digit'});
+    const pctEl = document.getElementById('rDonutPct');
+    const pct = pctEl ? pctEl.textContent : '';
+    if(ph){
+      ph.innerHTML = `<h1>${t.printHeaderTitle}</h1>
+        <div class="meta">${t.printHeaderMeta(dateStr, pct)}</div>`;
+      ph.style.display = 'block';
+    }
+    if(headerRow) headerRow.style.display = 'none';
+
+    try{
+      if(typeof html2canvas !== 'function' || !window.jspdf){
+        throw new Error('PDF libraries unavailable');
+      }
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pageW = 612, pageH = 792; // US Letter, pt
+      const margin = 25.2; // 0.35in, matches @page rule used for printing
+      const usableW = pageW - margin * 2;
+      const usableH = pageH - margin * 2;
+      let w = usableW;
+      let h = canvas.height * (w / canvas.width);
+      if(h > usableH){
+        const scale = usableH / h;
+        h = usableH;
+        w = w * scale;
+      }
+      const x = margin + (usableW - w) / 2;
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      doc.addImage(imgData, 'PNG', x, margin, w, h);
+      const dateSlug = now.toISOString().slice(0,10);
+      doc.save(`resumo-wms-${dateSlug}.pdf`);
+    }catch(err){
+      console.error(err);
+      showSaveError(appLang === 'en'
+        ? 'Could not generate the PDF — please try again.'
+        : 'Não foi possível gerar o PDF — tente novamente.');
+    }finally{
+      if(ph) ph.style.display = '';
+      if(headerRow) headerRow.style.display = headerRowOriginalDisplay;
+      btn.disabled = false;
+      btn.textContent = originalIcon;
+      btn.title = originalTitle;
+      btn.setAttribute('aria-label', originalTitle);
+    }
   });
 
   document.getElementById('addErrorBtn').addEventListener('click', async ()=>{
