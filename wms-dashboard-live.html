@@ -1467,9 +1467,11 @@ async function init(){
       const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
-        backgroundColor: null
+        backgroundColor: '#ffffff'
       });
-      const imgData = canvas.toDataURL('image/png');
+      // JPEG at high quality keeps this a few hundred KB instead of the
+      // tens of MB a lossless PNG of a full-page 2x-scaled capture would be.
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
       const { jsPDF } = window.jspdf;
       const pageW = 612, pageH = 792; // US Letter, pt
       const margin = 25.2; // 0.35in, matches @page rule used for printing
@@ -1484,7 +1486,7 @@ async function init(){
       }
       const x = margin + (usableW - w) / 2;
       const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-      doc.addImage(imgData, 'PNG', x, margin, w, h);
+      doc.addImage(imgData, 'JPEG', x, margin, w, h);
       const dateSlug = now.toISOString().slice(0,10);
       doc.save(`resumo-wms-${dateSlug}.pdf`);
     }catch(err){
