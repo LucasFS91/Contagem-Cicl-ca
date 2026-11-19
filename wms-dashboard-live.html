@@ -494,7 +494,6 @@
       <div class="r-panel-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
         <div>
           <h2 style="margin-bottom:2px;" id="rMainTitle">Resumo Geral — Implementação WMS</h2>
-          <p class="hint" style="margin-bottom:0;" id="rSubtitle">Visão consolidada de uma página, pronta para impressão e compartilhamento.</p>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <div class="r-lang-toggle" id="rLangToggle">
@@ -712,7 +711,6 @@ function renderActivities(){
 const I18N = {
   pt: {
     mainTitle:'Resumo Geral — Implementação WMS',
-    subtitle:'Visão consolidada de uma página, pronta para impressão e compartilhamento.',
     printBtn:'Imprimir Resumo',
     lblTotal:'Total de atividades',
     lblOfficial:'Oficialmente concluído',
@@ -798,7 +796,6 @@ const I18N = {
   },
   en: {
     mainTitle:'Overall Summary — WMS Implementation',
-    subtitle:'One-page consolidated view, ready for printing and sharing.',
     printBtn:'Print Summary',
     lblTotal:'Total activities',
     lblOfficial:'Officially completed',
@@ -965,7 +962,6 @@ function applyAppLang(lang){
 
   // resumo tab (existing)
   set('rMainTitle', t.mainTitle);
-  set('rSubtitle', t.subtitle);
   set('rPrintBtnLabel', t.printBtn);
   set('rLblTotal', t.lblTotal);
   set('rLblOfficial', t.lblOfficial);
