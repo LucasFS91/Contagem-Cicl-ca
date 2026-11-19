@@ -305,6 +305,12 @@
   .sidebar-lang-toggle .r-lang-opt{color:#c9d4e8;}
   .sidebar-lang-toggle .r-lang-opt:hover{color:#fff;}
   .sidebar-lang-toggle .r-lang-opt.active{background:rgba(255,255,255,0.95);color:var(--navy);}
+  .save-error-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(16px);
+    background:#c81d25;color:#fff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:600;
+    box-shadow:0 14px 36px rgba(0,0,0,0.35);z-index:300;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;max-width:min(90vw,420px);text-align:center;}
+  .save-error-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media print{ .save-error-toast{display:none !important;} }
   .r-amber{color:var(--amber);font-weight:700;}
   .r-red{color:var(--accent);font-weight:700;}
   .r-muted{color:var(--muted);font-style:italic;}
@@ -627,6 +633,8 @@
   </section>
 </div>
 </div>
+
+<div id="saveErrorToast" class="save-error-toast" role="alert"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1253,6 +1261,18 @@ function fromDbError(r){
   };
 }
 
+let saveErrorToastTimer = null;
+function showSaveError(){
+  const el = document.getElementById('saveErrorToast');
+  if(!el) return;
+  el.textContent = appLang === 'en'
+    ? 'Could not save — check your connection and try again.'
+    : 'Não foi possível salvar — verifique sua conexão e tente novamente.';
+  el.classList.add('show');
+  clearTimeout(saveErrorToastTimer);
+  saveErrorToastTimer = setTimeout(() => el.classList.remove('show'), 5000);
+}
+
 async function loadActivities(){
   try{
     const { data, error } = await sb.from('wms_activities').select('*').order('sort_order');
@@ -1305,32 +1325,42 @@ async function init(){
     const id = e.target.dataset.id;
     if(!id) return;
     try{
+      let error;
       if(e.target.classList.contains('official-cb')){
         const checked = e.target.checked;
-        await sb.from('wms_activities').update({
+        ({error} = await sb.from('wms_activities').update({
           official: checked,
           completed_at: checked ? new Date().toISOString().slice(0,10) : ''
-        }).eq('id', id);
+        }).eq('id', id));
       } else if(e.target.classList.contains('obs-input')){
-        await sb.from('wms_activities').update({observacao: e.target.value}).eq('id', id);
+        ({error} = await sb.from('wms_activities').update({observacao: e.target.value}).eq('id', id));
       } else if(e.target.classList.contains('colab-input')){
-        await sb.from('wms_activities').update({colaborador: e.target.value}).eq('id', id);
+        ({error} = await sb.from('wms_activities').update({colaborador: e.target.value}).eq('id', id));
       } else if(e.target.classList.contains('suporte-input')){
-        await sb.from('wms_activities').update({responsavel_sistema: e.target.value}).eq('id', id);
+        ({error} = await sb.from('wms_activities').update({responsavel_sistema: e.target.value}).eq('id', id));
       } else if(e.target.classList.contains('status-select')){
-        await sb.from('wms_activities').update({informal_status: e.target.value}).eq('id', id);
+        ({error} = await sb.from('wms_activities').update({informal_status: e.target.value}).eq('id', id));
       } else if(e.target.classList.contains('plano-input')){
-        await sb.from('wms_activities').update({plano_acao: e.target.value}).eq('id', id);
+        ({error} = await sb.from('wms_activities').update({plano_acao: e.target.value}).eq('id', id));
+      } else {
+        return;
       }
-    }catch(err){ console.error(err); }
+      if(error) throw error;
+    }catch(err){ console.error(err); showSaveError(); }
   });
 
   document.body.addEventListener('click', async (e)=>{
     if(e.target.classList.contains('del-activity')){
-      try{ await sb.from('wms_activities').delete().eq('id', e.target.dataset.id); }catch(err){ console.error(err); }
+      try{
+        const {error} = await sb.from('wms_activities').delete().eq('id', e.target.dataset.id);
+        if(error) throw error;
+      }catch(err){ console.error(err); showSaveError(); }
     }
     if(e.target.classList.contains('del-error')){
-      try{ await sb.from('wms_errors').delete().eq('id', e.target.dataset.id); }catch(err){ console.error(err); }
+      try{
+        const {error} = await sb.from('wms_errors').delete().eq('id', e.target.dataset.id);
+        if(error) throw error;
+      }catch(err){ console.error(err); showSaveError(); }
     }
   });
 
@@ -1341,17 +1371,18 @@ async function init(){
     const obs = document.getElementById('newObs').value.trim();
     const suporte = document.getElementById('newSuporte').value.trim() || 'Loiue e Yoi';
     try{
-      await sb.from('wms_activities').insert({
+      const {error} = await sb.from('wms_activities').insert({
         id: crypto.randomUUID(),
         processo: proc, colaborador: colab, observacao: obs,
         responsavel_sistema: suporte, informal_status: 'NAO',
         official: false, completed_at: '', plano_acao: '',
-        sort_order: (activities.length || 0) + 1 + Math.random()
+        sort_order: (activities.length || 0) + 1
       });
+      if(error) throw error;
       document.getElementById('newProc').value='';
       document.getElementById('newColab').value='';
       document.getElementById('newObs').value='';
-    }catch(err){ console.error(err); }
+    }catch(err){ console.error(err); showSaveError(); }
   });
 
   document.getElementById('printStatusBtn').addEventListener('click', () => {
@@ -1395,16 +1426,17 @@ async function init(){
     const resp = document.getElementById('errResp').value.trim() || 'Loiue e Yoi';
     const fixed = document.getElementById('errFixed').value;
     try{
-      await sb.from('wms_errors').insert({
+      const {error} = await sb.from('wms_errors').insert({
         id: crypto.randomUUID(), error_date: date, description: desc,
         cause, action_plan: plan, responsible: resp, fixed
       });
+      if(error) throw error;
       document.getElementById('errDesc').value='';
       document.getElementById('errCause').value='';
       document.getElementById('errPlan').value='';
       document.getElementById('errDate').value='';
       document.getElementById('errFixed').value='pendente';
-    }catch(err){ console.error(err); }
+    }catch(err){ console.error(err); showSaveError(); }
   });
 }
 
