@@ -321,10 +321,11 @@
     backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
     box-shadow:none !important;
   }
-  body.pdf-capturing .r-kpi.navy{box-shadow:inset 4px 0 0 0 var(--navy) !important;}
-  body.pdf-capturing .r-kpi.green{box-shadow:inset 4px 0 0 0 var(--green) !important;}
-  body.pdf-capturing .r-kpi.amber{box-shadow:inset 4px 0 0 0 var(--amber) !important;}
-  body.pdf-capturing .r-kpi.red{box-shadow:inset 4px 0 0 0 var(--accent) !important;}
+  body.pdf-capturing .r-kpi::before{display:none !important;}
+  body.pdf-capturing .r-kpi.navy{border-left:4px solid var(--navy) !important;}
+  body.pdf-capturing .r-kpi.green{border-left:4px solid var(--green) !important;}
+  body.pdf-capturing .r-kpi.amber{border-left:4px solid var(--amber) !important;}
+  body.pdf-capturing .r-kpi.red{border-left:4px solid var(--accent) !important;}
   body.pdf-capturing .r-kpi .val{
     background:none !important; filter:none !important;
     -webkit-background-clip:border-box !important; background-clip:border-box !important;
