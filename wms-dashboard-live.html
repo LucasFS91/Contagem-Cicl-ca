@@ -360,6 +360,10 @@
   .chart-tip.wider{width:min(780px, calc(100vw - 16px));max-width:none;}
   .chart-tip{max-height:calc(100vh - 16px);overflow:hidden;}
   @media (max-width:640px){
+    .chart-tip{font-size:11.5px;line-height:1.3;padding:8px 10px;max-width:250px;}
+    .chart-tip .ct-big{font-size:16px;}
+    .chart-tip .ct-block{margin-top:5px;padding-top:5px;}
+    .chart-tip .ct-list li::before{top:5px;}
     .chart-tip .ct-list.cols-2, .chart-tip .ct-list.cols-3{column-count:2;column-gap:14px;}
     .chart-tip.wide, .chart-tip.wider{width:calc(100vw - 16px);max-width:none;font-size:11.5px;}
   }
@@ -1645,7 +1649,10 @@ function setupDonut(wrapId, pctId, lblId){
       + '<div class="ct-sub">' + escapeHtml(t.tlOfTotal(seg.list.length, seg.total)) + '</div>'
       + (names.length ? tipListHtml('', names, DONUT_SEG_COLOR[seg.key]) : '')
       + '<div class="ct-hint">' + escapeHtml(st.lastPointer === 'touch' ? t.donutTapHint : t.donutClickHint) + '</div>';
-    showChartTip(owner, html, cx, cy, 16);
+    const ring = wrap.querySelector('svg');
+    const centre = pctEl && pctEl.parentElement;
+    showChartTip(owner, html, cx, cy, 16, ring ? ring.getBoundingClientRect() : null,
+                 centre ? centre.getBoundingClientRect() : null);
   }
   st.reset = () => apply(null);
   wrap.addEventListener('pointermove', e => {
@@ -1671,7 +1678,9 @@ function setupDonut(wrapId, pctId, lblId){
 
 /* ---- Shared tooltip ---- */
 let chartTipOwner = null;
-function showChartTip(owner, html, ax, ay, offset){
+// avoidRect (optional): an area the tooltip must not cover — for the donuts
+// that is the whole ring, so its centre percentage always stays visible.
+function showChartTip(owner, html, ax, ay, offset, avoidRect, keepRect){
   const tip = document.getElementById('chartTip');
   if(!tip) return;
   chartTipOwner = owner;
@@ -1681,11 +1690,42 @@ function showChartTip(owner, html, ax, ay, offset){
   tip.setAttribute('aria-hidden', 'false');
   tip.style.left = '0px'; tip.style.top = '0px';
   const w = tip.offsetWidth, h = tip.offsetHeight, gap = offset || 14;
-  let left = ax - w / 2;
-  let top = ay - h - gap;
-  if(top < 8) top = ay + gap;
-  left = Math.max(8, Math.min(window.innerWidth - w - 8, left));
-  top = Math.max(8, Math.min(window.innerHeight - h - 8, top));
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const clampX = x => Math.max(8, Math.min(vw - w - 8, x));
+  const clampY = y => Math.max(8, Math.min(vh - h - 8, y));
+  let left = null, top = null;
+  if(avoidRect){
+    // beside the ring: on the side the pointer is on, else the other side
+    const right = avoidRect.right + gap, leftSide = avoidRect.left - gap - w;
+    const fitsRight = right + w <= vw - 8, fitsLeft = leftSide >= 8;
+    const preferRight = ax >= avoidRect.left + avoidRect.width / 2;
+    if(preferRight ? fitsRight : fitsLeft){ left = preferRight ? right : leftSide; }
+    else if(preferRight ? fitsLeft : fitsRight){ left = preferRight ? leftSide : right; }
+    if(left !== null){
+      top = clampY(ay - h / 2);
+    } else {
+      // no room at the sides (phones): above or below the ring instead
+      const above = avoidRect.top - gap - h, below = avoidRect.bottom + gap;
+      if(above >= 8) top = above;
+      else if(below + h <= vh - 8) top = below;
+      else if(keepRect){
+        // small screens: the ring can't stay fully clear, but keep at least
+        // the centre percentage visible (above it or below it)
+        const aboveTop = keepRect.top - 6 - h, belowTop = keepRect.bottom + 6;
+        if(aboveTop >= 8) top = aboveTop;
+        else if(belowTop + h <= vh - 8) top = belowTop;
+        else top = clampY((keepRect.top - 8) >= (vh - keepRect.bottom) ? aboveTop : belowTop);  // always fully on screen
+      }
+      if(top !== null) left = clampX(ax - w / 2);
+    }
+  }
+  if(left === null || top === null){
+    left = ax - w / 2;
+    top = ay - h - gap;
+    if(top < 8) top = ay + gap;
+    left = clampX(left);
+    top = clampY(top);
+  }
   tip.style.left = Math.round(left) + 'px';
   tip.style.top = Math.round(top) + 'px';
   tip.classList.add('show');
