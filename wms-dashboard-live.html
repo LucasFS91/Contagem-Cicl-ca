@@ -353,6 +353,16 @@
   .chart-tip .ct-head{font-weight:700;margin-bottom:2px;}
   .chart-tip .ct-more{color:var(--muted);padding-left:12px;}
   .chart-tip .ct-list{margin:0;padding:0;list-style:none;}
+  .chart-tip .ct-list.cols-2{column-count:2;column-gap:20px;}
+  .chart-tip .ct-list.cols-3{column-count:3;column-gap:20px;}
+  .chart-tip .ct-list li{break-inside:avoid;}
+  .chart-tip.wide{width:min(560px, calc(100vw - 16px));max-width:none;}
+  .chart-tip.wider{width:min(780px, calc(100vw - 16px));max-width:none;}
+  .chart-tip{max-height:calc(100vh - 16px);overflow:hidden;}
+  @media (max-width:640px){
+    .chart-tip .ct-list.cols-2, .chart-tip .ct-list.cols-3{column-count:2;column-gap:14px;}
+    .chart-tip.wide, .chart-tip.wider{width:calc(100vw - 16px);max-width:none;font-size:11.5px;}
+  }
   .chart-tip .ct-list li{padding:1px 0 1px 12px;position:relative;}
   .chart-tip .ct-list li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--ct-dot,#e0454c);}
   .chart-tip .ct-hint{margin-top:6px;font-size:11.5px;color:var(--muted);font-style:italic;}
@@ -924,8 +934,8 @@ const I18N = {
     tlEmpty:'Nenhuma atividade cadastrada ainda.',
     tlAria:'Gráfico de linha da evolução do percentual oficialmente concluído. Use as setas para navegar pelos pontos.',
     donutCount:n=>`${n} ${n===1?'atividade':'atividades'}`,
-    donutClickHint:'Clique para ver a lista completa',
-    donutTapHint:'Toque de novo para ver a lista completa',
+    donutClickHint:'Clique para abrir esta lista',
+    donutTapHint:'Toque de novo para abrir esta lista',
     donutNone:'Nenhuma atividade nesta categoria',
     confirmDelete:'Clique de novo para remover',
     loadErrorActivities:'Não foi possível carregar as atividades.',
@@ -1034,8 +1044,8 @@ const I18N = {
     tlEmpty:'No activities yet.',
     tlAria:'Line chart of the officially completed percentage over time. Use the arrow keys to move between points.',
     donutCount:n=>`${n} ${n===1?'activity':'activities'}`,
-    donutClickHint:'Click to see the full list',
-    donutTapHint:'Tap again to see the full list',
+    donutClickHint:'Click to open this list',
+    donutTapHint:'Tap again to open this list',
     donutNone:'No activities in this category',
     confirmDelete:'Click again to remove',
     loadErrorActivities:'Could not load the activities.',
@@ -1506,14 +1516,14 @@ function tlIndexFromClientX(clientX){
   TL.geom.xs.forEach((px, i) => { const d = Math.abs(px - x); if(d < bd){ bd = d; best = i; } });
   return best;
 }
+// Lists every task (no "+ N more" cut-off). Long lists flow into 2 or 3
+// columns so the tooltip stays on screen; phones always use one column.
 function tipListHtml(head, names, dot){
-  const t = I18N[appLang] || I18N.pt;
-  const max = 6;
+  const cols = names.length > 30 ? 3 : (names.length > 14 ? 2 : 1);
   let html = '<div class="ct-block">';
   if(head) html += '<div class="ct-head">' + escapeHtml(head) + '</div>';
-  html += '<ul class="ct-list" style="--ct-dot:' + dot + '">'
-        + names.slice(0, max).map(nm => '<li>' + escapeHtml(nm) + '</li>').join('') + '</ul>';
-  if(names.length > max) html += '<div class="ct-more">' + escapeHtml(t.tlMore(names.length - max)) + '</div>';
+  html += '<ul class="ct-list cols-' + cols + '" style="--ct-dot:' + dot + '">'
+        + names.map(nm => '<li>' + escapeHtml(nm) + '</li>').join('') + '</ul>';
   return html + '</div>';
 }
 function setTimelineActive(i){
@@ -1666,6 +1676,8 @@ function showChartTip(owner, html, ax, ay, offset){
   if(!tip) return;
   chartTipOwner = owner;
   tip.innerHTML = html;
+  tip.classList.toggle('wide', !!tip.querySelector('.ct-list.cols-2'));
+  tip.classList.toggle('wider', !!tip.querySelector('.ct-list.cols-3'));
   tip.setAttribute('aria-hidden', 'false');
   tip.style.left = '0px'; tip.style.top = '0px';
   const w = tip.offsetWidth, h = tip.offsetHeight, gap = offset || 14;
