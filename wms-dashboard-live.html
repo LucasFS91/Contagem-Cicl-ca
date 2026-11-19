@@ -302,6 +302,34 @@
   .r-table th{background:var(--navy);color:#fff;text-align:left;padding:6px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.02em;}
   .r-table td{padding:6px 9px;border-bottom:1px solid var(--border);}
   .r-table tr:nth-child(even) td{background:rgba(127,133,145,0.09);}
+  /* Capture-mode overrides: the PDF download rasterizes #tab-resumo with
+     html2canvas, which cannot render backdrop-filter blur or
+     background-clip:text gradients — they come out as a flat washed-out
+     grey and invisible numbers. Swap in solid, theme-correct equivalents
+     (using the same CSS variables, so every theme still matches) only
+     while body.pdf-capturing is set, so the normal on-screen glass look
+     is untouched. */
+  body.pdf-capturing #tab-resumo{background:var(--bg) !important;}
+  body.pdf-capturing .r-wrap,
+  body.pdf-capturing .r-donut-card,
+  body.pdf-capturing .r-timeline-card{
+    background:var(--card) !important;
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+  }
+  body.pdf-capturing .r-kpi{
+    background:var(--card) !important;
+    backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    box-shadow:none !important;
+  }
+  body.pdf-capturing .r-kpi.navy{box-shadow:inset 4px 0 0 0 var(--navy) !important;}
+  body.pdf-capturing .r-kpi.green{box-shadow:inset 4px 0 0 0 var(--green) !important;}
+  body.pdf-capturing .r-kpi.amber{box-shadow:inset 4px 0 0 0 var(--amber) !important;}
+  body.pdf-capturing .r-kpi.red{box-shadow:inset 4px 0 0 0 var(--accent) !important;}
+  body.pdf-capturing .r-kpi .val{
+    background:none !important; filter:none !important;
+    -webkit-background-clip:border-box !important; background-clip:border-box !important;
+    -webkit-text-fill-color:currentColor !important;
+  }
   .r-lang-toggle{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;}
   .r-lang-opt{font:inherit;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted);background:transparent;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;transition:background-color .15s ease,color .15s ease;}
   .r-lang-opt:hover{color:var(--text);}
@@ -1459,15 +1487,17 @@ async function init(){
       ph.style.display = 'block';
     }
     if(headerRow) headerRow.style.display = 'none';
+    document.body.classList.add('pdf-capturing');
 
     try{
       if(typeof html2canvas !== 'function' || !window.jspdf){
         throw new Error('PDF libraries unavailable');
       }
+      const bgColor = (getComputedStyle(document.body).getPropertyValue('--bg') || '#ffffff').trim() || '#ffffff';
       const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: bgColor
       });
       // JPEG at high quality keeps this a few hundred KB instead of the
       // tens of MB a lossless PNG of a full-page 2x-scaled capture would be.
@@ -1495,6 +1525,7 @@ async function init(){
         ? 'Could not generate the PDF — please try again.'
         : 'Não foi possível gerar o PDF — tente novamente.');
     }finally{
+      document.body.classList.remove('pdf-capturing');
       if(ph) ph.style.display = '';
       if(headerRow) headerRow.style.display = headerRowOriginalDisplay;
       btn.disabled = false;
