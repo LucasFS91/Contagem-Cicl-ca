@@ -286,9 +286,12 @@
   .r-kpi.amber::before{background:var(--amber);}
   .r-kpi.red::before{background:var(--accent);}
   .r-kpi .lbl{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.03em;}
-  .r-kpi .val{font-size:28px;font-weight:800;color:var(--text);margin-top:2px;line-height:1.1;}
+  .r-kpi .val{font-size:28px;font-weight:800;margin-top:2px;line-height:1.1;color:#2f6fe0;background:linear-gradient(135deg,#7ab3ff,#2f6fe0 55%,#1c56b0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(47,111,224,.35));}
+  .r-kpi.green .val{color:#1a9c5b;background:linear-gradient(135deg,#6bf0b8,#1a9c5b 55%,#0f8a53);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(26,156,91,.35));}
+  .r-kpi.amber .val{color:#b9780a;background:linear-gradient(135deg,#ffd278,#e0960e 55%,#c98300);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(185,120,10,.35));}
+  .r-kpi.red .val{color:#c81d25;background:linear-gradient(135deg,#ff8a92,#df2f38 55%,#c81d25);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(200,29,37,.35));}
   .r-kpi .sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
-  .r-charts-row{display:grid;grid-template-columns:1fr 1.05fr;gap:18px;align-items:center;margin-bottom:20px;}
+  .r-charts-row{display:grid;grid-template-columns:1fr 1.05fr;gap:18px;align-items:stretch;margin-bottom:20px;}
   .r-donut-card, .r-timeline-card{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--glass-shadow);transition:background-color .25s ease;}
   .r-timeline-card img{width:100%;height:auto;max-height:280px;object-fit:contain;display:block;margin:0 auto;}
   .r-section-title{font-size:17px;font-weight:700;color:var(--text);margin:18px 0 8px;}
