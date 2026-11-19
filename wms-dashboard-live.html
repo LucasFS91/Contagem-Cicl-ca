@@ -566,9 +566,9 @@
   <section class="tab-panel active" id="tab-overview">
     <div class="cards">
       <div class="card"><div class="label" id="ovLblTotal">Total de atividades</div><div class="value" id="ovTotal">—</div></div>
-      <div class="card green"><div class="label" id="ovLblOfficial">Oficialmente concluído</div><div class="value" id="ovOfficial">—</div><div class="sub" id="ovOfficialSub"></div></div>
-      <div class="card amber"><div class="label" id="ovLblTested">Testado, não oficial</div><div class="value" id="ovTested">—</div><div class="sub" id="ovTestedSub"></div></div>
-      <div class="card red"><div class="label" id="ovLblNotTested">Não testado</div><div class="value" id="ovNotTested">—</div><div class="sub" id="ovNotTestedSub"></div></div>
+      <div class="card green"><div class="label" id="ovLblOfficial">Oficialmente concluído</div><div class="value" id="ovOfficial">—</div></div>
+      <div class="card amber"><div class="label" id="ovLblTested">Testado, não oficial</div><div class="value" id="ovTested">—</div></div>
+      <div class="card red"><div class="label" id="ovLblNotTested">Não testado</div><div class="value" id="ovNotTested">—</div></div>
     </div>
 
     <section class="panel">
@@ -625,9 +625,9 @@
 
       <div class="r-kpis">
         <div class="r-kpi navy"><div class="lbl" id="rLblTotal">Total de atividades</div><div class="val" id="rKpiTotal">—</div></div>
-        <div class="r-kpi green"><div class="lbl" id="rLblOfficial">Oficialmente concluído</div><div class="val" id="rKpiOfficial">—</div><div class="sub" id="rKpiOfficialSub"></div></div>
-        <div class="r-kpi amber"><div class="lbl" id="rLblTested">Testado, não oficial</div><div class="val" id="rKpiTested">—</div><div class="sub" id="rKpiTestedSub"></div></div>
-        <div class="r-kpi red"><div class="lbl" id="rLblNotTested">Não testado</div><div class="val" id="rKpiNotTested">—</div><div class="sub" id="rKpiNotTestedSub"></div></div>
+        <div class="r-kpi green"><div class="lbl" id="rLblOfficial">Oficialmente concluído</div><div class="val" id="rKpiOfficial">—</div></div>
+        <div class="r-kpi amber"><div class="lbl" id="rLblTested">Testado, não oficial</div><div class="val" id="rKpiTested">—</div></div>
+        <div class="r-kpi red"><div class="lbl" id="rLblNotTested">Não testado</div><div class="val" id="rKpiNotTested">—</div></div>
       </div>
 
       <div class="r-charts-row">
@@ -1287,11 +1287,8 @@ function renderResumo(){
 
   document.getElementById('rKpiTotal').textContent = total;
   document.getElementById('rKpiOfficial').textContent = official.length;
-  document.getElementById('rKpiOfficialSub').textContent = total ? Math.round(pctOfficial*100)+t.ofTotal : '';
   document.getElementById('rKpiTested').textContent = tested.length;
-  document.getElementById('rKpiTestedSub').textContent = total ? Math.round(pctTested*100)+t.ofTotal : '';
   document.getElementById('rKpiNotTested').textContent = notTested.length;
-  document.getElementById('rKpiNotTestedSub').textContent = total ? Math.round(pctNotTested*100)+t.ofTotal : '';
 
   const segO = document.getElementById('rSegOfficial');
   const segT = document.getElementById('rSegTested');
@@ -1758,11 +1755,8 @@ function updateOverview(){
 
   document.getElementById('ovTotal').textContent = total;
   document.getElementById('ovOfficial').textContent = official;
-  document.getElementById('ovOfficialSub').textContent = total ? Math.round(pctOfficial*100)+t.ofTotal : '';
   document.getElementById('ovTested').textContent = tested;
-  document.getElementById('ovTestedSub').textContent = total ? Math.round(pctTested*100)+t.ofTotal : '';
   document.getElementById('ovNotTested').textContent = notTested;
-  document.getElementById('ovNotTestedSub').textContent = total ? Math.round(pctNotTested*100)+t.ofTotal : '';
 
   // Donut segments (stacked, starting at top via -90deg rotation on <svg>)
   const segOfficial = document.getElementById('seg-official');
