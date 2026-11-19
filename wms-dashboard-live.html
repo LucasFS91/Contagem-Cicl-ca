@@ -134,11 +134,12 @@
   .main-col{margin-left:280px;}
 
   /* Theme switcher */
-  .theme-wrap{position:relative;margin-top:10px;}
+  .sidebar-icon-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .theme-wrap{position:relative;}
   .theme-btn{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#dce5f5;
     font-size:19px;line-height:1;width:42px;height:42px;padding:0;cursor:pointer;border-radius:12px;}
   .theme-btn:hover{background:rgba(255,255,255,0.16);}
-  .theme-popover{position:absolute;left:0;right:0;bottom:calc(100% + 8px);background:#101a34;border:1px solid rgba(255,255,255,0.14);
+  .theme-popover{position:absolute;left:0;bottom:calc(100% + 8px);width:240px;background:#101a34;border:1px solid rgba(255,255,255,0.14);
     border-radius:14px;padding:10px;box-shadow:0 16px 40px rgba(0,0,0,0.45);display:none;z-index:80;}
   .theme-popover.open{display:block;}
   .theme-popover .th-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8d9ac0;font-weight:700;padding:2px 6px 8px;}
@@ -155,7 +156,8 @@
     .sidebar-logo{margin:0 14px 0 0;}
     .sidebar-label{display:none;}
     .sidebar .tab-btn{width:auto;white-space:nowrap;margin-bottom:0;}
-    .sidebar-lang-toggle{align-self:center;}
+    .sidebar-icon-row{margin-top:0;}
+    .sidebar-lang-toggle{align-self:center;margin-top:0;}
     .main-col{margin-left:0;}
   }
   .byd-badge{position:relative;width:200px;height:200px;flex:0 0 auto;border-radius:40px;
@@ -165,8 +167,7 @@
     display:flex;align-items:center;justify-content:center;
     transform:perspective(700px) rotateX(6deg);
     transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
-    will-change:transform;cursor:pointer;
-    border:1px solid rgba(255,255,255,0.25);}
+    will-change:transform;cursor:pointer;}
   .byd-badge:hover{box-shadow:0 1px 0 rgba(255,255,255,0.4) inset, 0 -4px 10px rgba(0,0,0,0.55) inset,
       0 30px 60px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.1);}
   .byd-badge .glow{position:absolute;inset:8%;border-radius:50%;
@@ -182,8 +183,9 @@
     filter:drop-shadow(0 5px 8px rgba(0,0,0,0.55)) drop-shadow(0 0 16px rgba(255,255,255,0.4));}
   .sidebar-title{color:#fff;font-size:16px;font-weight:800;letter-spacing:.02em;text-align:center;margin:0 0 20px;}
   .sidebar-spacer{flex:1;}
-  .print-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff !important;margin-top:10px;justify-content:center;}
-  .print-btn:hover{background:rgba(255,255,255,0.18);color:#fff;}
+  .print-btn{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#dce5f5;
+    font-size:19px;line-height:1;width:42px;height:42px;padding:0;cursor:pointer;border-radius:12px;flex:none;}
+  .print-btn:hover{background:rgba(255,255,255,0.16);}
   .wrap{padding-top:28px;}
 
   .tab-panel{display:none;}
@@ -193,14 +195,14 @@
   #tab-overview > .cards{position:sticky;top:0;z-index:25;
     background:var(--bg);backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);
     padding:14px 0 10px;box-shadow:0 10px 24px rgba(15,31,61,0.07);}
-  .card{background:var(--card);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:16px;padding:18px 20px;box-shadow:var(--glass-shadow);transition:transform .15s ease, background-color .25s ease;}
+  .card{background:var(--glass-bg);backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);border:1px solid var(--glass-border);border-radius:16px;padding:18px 20px;box-shadow:var(--glass-shadow);transition:transform .15s ease, background-color .25s ease;}
   .card:hover{transform:translateY(-2px);}
   .card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;font-weight:600;}
-  .card .value{font-size:29px;font-weight:800;color:#2f6fe0;background:linear-gradient(135deg,#5b9bff,#1c56b0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .card .value{font-size:33px;font-weight:800;letter-spacing:-.01em;color:#2f6fe0;background:linear-gradient(135deg,#7ab3ff,#2f6fe0 55%,#1c56b0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(47,111,224,.35));}
   .card .sub{font-size:12px;color:var(--muted);margin-top:4px;}
-  .card.green .value{color:#1a9c5b;background:linear-gradient(135deg,#3fe0a0,#0f8a53);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-  .card.amber .value{color:#b9780a;background:linear-gradient(135deg,#ffc247,#c98300);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-  .card.red .value{color:#c81d25;background:linear-gradient(135deg,#ff6b74,#c81d25);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .card.green .value{color:#1a9c5b;background:linear-gradient(135deg,#6bf0b8,#1a9c5b 55%,#0f8a53);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(26,156,91,.35));}
+  .card.amber .value{color:#b9780a;background:linear-gradient(135deg,#ffd278,#e0960e 55%,#c98300);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(185,120,10,.35));}
+  .card.red .value{color:#c81d25;background:linear-gradient(135deg,#ff8a92,#df2f38 55%,#c81d25);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(200,29,37,.35));}
 
   section.panel{background:var(--glass-bg);backdrop-filter:var(--panel-blur);-webkit-backdrop-filter:var(--panel-blur);border:1px solid var(--glass-border);border-radius:20px;padding:24px 26px;margin-bottom:22px;box-shadow:var(--glass-shadow);}
   section.panel h2{margin:0 0 4px;font-size:18px;}
@@ -399,6 +401,7 @@
   <button class="tab-btn" data-tab="finalizados"><span id="navFinalizados">Finalizados</span></button>
   <button class="tab-btn" data-tab="erros"><span id="navErros">Erros</span></button>
   <div class="sidebar-spacer"></div>
+  <div class="sidebar-icon-row">
   <div class="theme-wrap">
     <div class="theme-popover" id="themePopover">
       <div class="th-title" id="themeTitleLabel">Tema do site</div>
@@ -440,11 +443,12 @@
     </div>
     <button class="theme-btn" id="themeBtn" type="button" title="Tema do site" aria-label="Tema do site">🎨</button>
   </div>
+  <button class="print-btn" id="printStatusBtn" type="button" title="Imprimir Status (PDF)" aria-label="Imprimir Status (PDF)">🖨️</button>
+  </div>
   <div class="r-lang-toggle sidebar-lang-toggle" id="rLangToggle">
     <button type="button" class="r-lang-opt active" data-lang="pt">PT</button>
     <button type="button" class="r-lang-opt" data-lang="en">EN</button>
   </div>
-  <button class="tab-btn print-btn" id="printStatusBtn" type="button" title="Imprimir Status (PDF)" aria-label="Imprimir Status (PDF)">🖨️</button>
 </aside>
 
 <div class="main-col">
