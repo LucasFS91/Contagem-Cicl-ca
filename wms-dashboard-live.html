@@ -236,36 +236,28 @@
   .legend-row .ltext{flex:1;font-size:14px;}
   .legend-row .ltext b{display:block;font-size:12px;color:var(--muted);font-weight:500;}
   .legend-row .lval{font-size:17px;font-weight:700;min-width:70px;text-align:right;}
-  /* ---- Realistic gradient meters (breakdown + legend) -------------------
-     Recessed track + glossy "tube" fill: colour gradient along the bar,
-     light-to-shade vertical gradient for volume, and a specular highlight. */
+  /* ---- Gradient meters (breakdown + legend) ------------------------------
+     Flat, clean gradient in the donut's status colours, with a soft glow in
+     the same tone under the fill and a light, flat track. */
   .legend-bar-bg, .breakdown-row .bar-bg{
-    position:relative;overflow:hidden;border-radius:999px;
-    background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.03) 70%), rgba(127,133,145,0.14);
-    box-shadow:inset 0 2px 4px rgba(0,0,0,0.20), inset 0 -1px 0 rgba(255,255,255,0.35);
+    position:relative;border-radius:999px;
+    background:rgba(127,133,145,0.15);
   }
-  .legend-bar-bg{height:10px;margin-top:6px;}
+  .legend-bar-bg{height:8px;margin-top:6px;}
   .legend-bar-fg, .breakdown-row .bar-fg{
-    height:100%;border-radius:999px;position:relative;
-    background-image:
-      linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.10) 40%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.22) 100%),
-      linear-gradient(90deg, var(--m1), var(--m2) 55%, var(--m3));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 3px rgba(0,0,0,0.25), inset -1px 0 2px rgba(0,0,0,0.18);
+    height:100%;border-radius:999px;
+    background:linear-gradient(90deg, var(--m1) 0%, var(--m2) 55%, var(--m3) 100%);
+    box-shadow:0 4px 12px -4px var(--mglow);
     transition:width .6s cubic-bezier(.22,1,.36,1);
   }
-  .legend-bar-fg::after, .breakdown-row .bar-fg::after{
-    content:"";position:absolute;left:7px;right:7px;top:2px;height:30%;border-radius:999px;pointer-events:none;
-    background:linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0));
-  }
-  .legend-bar-fg::after{left:4px;right:4px;top:1px;height:35%;}
-  .tone-official{--m1:#4be8a2;--m2:#1fb36d;--m3:#0c6f3f;}
-  .tone-tested{--m1:#ffd877;--m2:#f0a21f;--m3:#a96504;}
-  .tone-nottested{--m1:#ff8a91;--m2:#e8343e;--m3:#9c1018;}
+  .tone-official{--m1:#6af3b8;--m2:#0ad97e;--m3:#07a560;--mglow:rgba(10,217,126,0.75);}
+  .tone-tested{--m1:#ffd877;--m2:#ffab00;--m3:#e08600;--mglow:rgba(255,171,0,0.75);}
+  .tone-nottested{--m1:#ff8a96;--m2:#ff3b4e;--m3:#d61f35;--mglow:rgba(255,59,78,0.75);}
 
   .breakdown-row{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--border);}
   .breakdown-row:last-child{border-bottom:none;}
   .breakdown-row .name{width:280px;font-size:13.5px;font-weight:600;flex:0 0 auto;line-height:1.35;}
-  .breakdown-row .bar-bg{flex:1;height:18px;}
+  .breakdown-row .bar-bg{flex:1;height:14px;}
   .breakdown-row .bcount{width:180px;text-align:right;font-size:12.5px;color:var(--muted);flex:0 0 auto;}
 
   table{width:100%;border-collapse:collapse;font-size:13.5px;}
