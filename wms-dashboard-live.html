@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WMS Implementation — Status Dashboard</title>
+<title>Implementação WMS — Painel de Status</title>
 <script>
   // Applies any previously saved theme before first paint, to avoid a flash
   // of the default theme for returning visitors who picked a different one.
@@ -272,6 +273,12 @@
   input.invalid{border-color:var(--accent) !important;box-shadow:0 0 0 3px rgba(200,29,37,0.18) !important;}
   select.err-fixed-select{font-weight:700;cursor:pointer;color:#fff;border:none;border-radius:999px;padding:4px 10px;font-size:11.5px;width:auto;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
   .load-error{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .tr-status{font-size:11px;color:#b8c4dc;margin-top:6px;min-height:14px;opacity:0;transition:opacity .2s ease;}
+  .tr-status.show{opacity:1;}
+  .tr-status.show::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px;border-radius:50%;
+    border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;animation:trSpin .8s linear infinite;}
+  @keyframes trSpin{to{transform:rotate(360deg);}}
+  @media print{ .tr-status{display:none !important;} }
   .load-error .btn{padding:6px 12px;font-size:12px;}
   .r-pdf-btn{padding:10px 14px;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;}
   .r-pdf-btn[disabled]{opacity:.6;cursor:default;}
@@ -468,7 +475,11 @@
     body.print-resumo-only .print-header-resumo .meta{font-size:10.5px;color:#444;}
     body.print-resumo-only .r-panel-header{display:none !important;}
     body.print-resumo-only .r-topband{margin:6px 0 10px;height:5px;}
-    body.print-resumo-only .r-kpis{gap:8px;margin-bottom:10px;}
+    body.print-resumo-only .r-kpis{gap:8px;margin-bottom:10px;grid-template-columns:repeat(4,1fr) !important;}
+    /* never push the whole report to page 2 (the generic tab-panel rule
+       avoids page breaks inside, which moves an over-tall block wholesale) */
+    body.print-resumo-only #tab-resumo{page-break-inside:auto !important;break-inside:auto !important;}
+    body.print-resumo-only .r-wrap > div[style*="overflow-x"]{overflow:visible !important;}
     body.print-resumo-only .r-kpi{padding:7px 10px;box-shadow:none !important;}
     body.print-resumo-only .r-kpi .val{font-size:18px;}
     body.print-resumo-only .r-kpi .lbl{font-size:9px;}
@@ -570,6 +581,7 @@
     <button type="button" class="r-lang-opt active" data-lang="pt">PT</button>
     <button type="button" class="r-lang-opt" data-lang="en">EN</button>
   </div>
+      <div class="tr-status" id="trStatus" aria-live="polite"></div>
 </aside>
 
 <div class="main-col">
@@ -607,7 +619,7 @@
       </div>
 
       <h3>📋 <span id="ovBreakdownTitle">Detalhamento por atividade</span></h3>
-      <div id="breakdownByColab"><p class="empty">Carregando…</p></div>
+      <div id="breakdownByColab"><p class="empty i18n-loading">Carregando…</p></div>
     </section>
 
   </section>
@@ -658,11 +670,19 @@
         </div>
       </div>
 
+      <h3 class="r-section-title" id="rErrSectionTitle">Resumo de Erros Operacionais</h3>
+      <div class="r-kpis">
+        <div class="r-kpi navy"><div class="lbl" id="rErrLblTotal">Erros registrados</div><div class="val" id="rErrTotal">—</div></div>
+        <div class="r-kpi red"><div class="lbl" id="rErrLblPend">Pendentes</div><div class="val" id="rErrPend">—</div></div>
+        <div class="r-kpi amber"><div class="lbl" id="rErrLblNo">Em andamento</div><div class="val" id="rErrNo">—</div></div>
+        <div class="r-kpi green"><div class="lbl" id="rErrLblYes">Corrigidos</div><div class="val" id="rErrYes">—</div></div>
+      </div>
+
       <h3 class="r-section-title"><span id="rPendingTitleText">Itens Pendentes</span> (<span id="rOpenCount">—</span>)</h3>
       <div style="overflow-x:auto;">
       <table class="r-table">
         <thead><tr><th id="rTh1">Processo</th><th id="rTh2">Status</th><th id="rTh3">Colaborador</th><th id="rTh4">Notas</th><th id="rTh5">Plano de Ação</th></tr></thead>
-        <tbody id="rOpenItemsBody"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+        <tbody id="rOpenItemsBody"><tr><td colspan="5" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
 
@@ -670,7 +690,7 @@
       <div style="overflow-x:auto;">
       <table class="r-table">
         <thead><tr><th id="rTh6">Processo</th><th id="rTh7">Colaborador</th><th id="rTh8">Concluído em</th></tr></thead>
-        <tbody id="rCompletedBody"><tr><td colspan="3" class="empty">Carregando...</td></tr></tbody>
+        <tbody id="rCompletedBody"><tr><td colspan="3" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
     </section>
@@ -684,7 +704,7 @@
       <div style="overflow-x:auto;">
       <table>
         <thead><tr><th style="width:36px;" id="pendT1h1">Oficial</th><th id="pendT1h2">Processo</th><th id="pendT1h3">Status</th><th id="pendT1h4">Observação</th><th id="pendT1h5">Colaborador</th><th id="pendT1h6">Suporte WMS</th><th id="pendT1h7">Plano de Ação</th><th style="width:30px;"></th></tr></thead>
-        <tbody id="bodyTestedPending"><tr><td colspan="8" class="empty">Carregando...</td></tr></tbody>
+        <tbody id="bodyTestedPending"><tr><td colspan="8" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
     </section>
@@ -694,7 +714,7 @@
       <div style="overflow-x:auto;">
       <table>
         <thead><tr><th style="width:36px;" id="pendT2h1">Oficial</th><th id="pendT2h2">Processo</th><th id="pendT2h3">Status</th><th id="pendT2h4">Observação</th><th id="pendT2h5">Colaborador</th><th id="pendT2h6">Suporte WMS</th><th id="pendT2h7">Plano de Ação</th><th style="width:30px;"></th></tr></thead>
-        <tbody id="bodyNotTested"><tr><td colspan="8" class="empty">Carregando...</td></tr></tbody>
+        <tbody id="bodyNotTested"><tr><td colspan="8" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
       <div class="add-row">
@@ -715,7 +735,7 @@
       <div style="overflow-x:auto;">
       <table>
         <thead><tr><th style="width:36px;" id="finTh1">Oficial</th><th id="finTh2">Processo</th><th id="finTh3">Concluído em</th><th id="finTh4">Observação</th><th id="finTh5">Colaborador</th><th id="finTh6">Suporte WMS</th></tr></thead>
-        <tbody id="bodyFinalizados"><tr><td colspan="6" class="empty">Carregando...</td></tr></tbody>
+        <tbody id="bodyFinalizados"><tr><td colspan="6" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
     </section>
@@ -822,9 +842,9 @@ function rowHtml(a){
       <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
       <td><select class="status-select ${a.informalStatus==='OK' ? 'pill ok' : 'pill nao'}" data-id="${escapeHtml(a.id)}" style="background:${a.informalStatus==='OK' ? 'linear-gradient(135deg,#1a9c5b,#2ec27e)' : 'linear-gradient(135deg,#c81d25,#e0454c)'};color:#fff;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);border-radius:999px;padding:4px 10px;font-size:11.5px;width:auto;"><option value="OK" ${a.informalStatus==='OK' ? 'selected' : ''}>OK</option><option value="NAO" ${a.informalStatus!=='OK' ? 'selected' : ''}>${t.statusNao}</option></select></td>
       <td>${obsInputHtml(a)}</td>
-      <td><input type="text" class="colab-input" data-id="${escapeHtml(a.id)}" value="${escapeHtml(a.colaborador)}"></td>
-      <td><input type="text" class="suporte-input" data-id="${escapeHtml(a.id)}" value="${escapeHtml(a.responsavelSistema)}"></td>
-      <td><input type="text" class="plano-input" data-id="${escapeHtml(a.id)}" placeholder="${t.aDefinir}" value="${escapeHtml(a.planoAcao)}"></td>
+      <td>${textInputHtml('colab-input', a, 'colaborador', trNames)}</td>
+      <td>${textInputHtml('suporte-input', a, 'responsavelSistema', trNames)}</td>
+      <td>${textInputHtml('plano-input', a, 'planoAcao', trText, ' placeholder="' + t.aDefinir + '"')}</td>
       <td><button class="btn danger del-activity" type="button" data-id="${escapeHtml(a.id)}" title="${t.removeLabel}" aria-label="${t.removeLabel}">×</button></td>
     </tr>`;
 }
@@ -883,8 +903,8 @@ function renderActivities(){
           <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
           <td>${fmtDate(a.completedAt)}</td>
           <td>${obsInputHtml(a)}</td>
-          <td><input type="text" class="colab-input" data-id="${escapeHtml(a.id)}" value="${escapeHtml(a.colaborador)}"></td>
-          <td><input type="text" class="suporte-input" data-id="${escapeHtml(a.id)}" value="${escapeHtml(a.responsavelSistema)}"></td>
+          <td>${textInputHtml('colab-input', a, 'colaborador', trNames)}</td>
+          <td>${textInputHtml('suporte-input', a, 'responsavelSistema', trNames)}</td>
         </tr>`).join('')
     : `<tr><td colspan="6" class="empty">${t.emptyFinalizados}</td></tr>`;
 
@@ -972,6 +992,8 @@ const I18N = {
     ovErrLblTotal:'Erros registrados', ovErrLblPend:'Pendentes', ovErrLblNo:'Em andamento', ovErrLblYes:'Corrigidos',
     noData:'Sem dados.',
     loading:'Carregando…',
+    docTitle:'Implementação WMS — Painel de Status',
+    translating:'Traduzindo textos…',
     pillOfficial:'Oficial', pillTestedPending:'Testado — pendente', pillNotTested:'Não testado',
     // ---- pendências tab ----
     pendTitle1:'Testado — aguardando validação oficial',
@@ -1082,6 +1104,8 @@ const I18N = {
     ovErrLblTotal:'Errors logged', ovErrLblPend:'Pending', ovErrLblNo:'In progress', ovErrLblYes:'Fixed',
     noData:'No data.',
     loading:'Loading…',
+    docTitle:'WMS Implementation — Status Dashboard',
+    translating:'Translating new texts…',
     pillOfficial:'Official', pillTestedPending:'Tested — pending', pillNotTested:'Not tested',
     // ---- pendências tab ----
     pendTitle1:'Tested — awaiting official validation',
@@ -1138,9 +1162,12 @@ const ACTIVITY_I18N = {
   'Criar Etiquetas': 'Create Labels',
   'Criar Itens Ativos (Z46)': 'Create Active Items (Z46)',
   'Comparação WMS e SAP': 'WMS vs SAP Comparison',
-  'Uso dos Coletores (PDA)': 'Use of Handheld Scanners (PDA)'
+  'Uso dos Coletores (PDA)': 'Use of Handheld Scanners (PDA)',
+  'Transferência DEP 1200 para DEP 2000': 'Transfer from DEP 1200 to DEP 2000'
 };
 const NOTES_I18N = {
+  'Necessário fazer treinamento.': 'Training is required.',
+  'Teste feito, mas necessário realizar mais vezes': 'Tested, but it needs to be run more times.',
   'Necessário realizar mais testes desse tipo de movimentação.': 'More testing is needed for this type of movement.',
   'Treinamento ainda não realizado': 'Training not yet completed',
   'Em execução': 'In progress',
@@ -1148,20 +1175,125 @@ const NOTES_I18N = {
   'Passar as informações aos colaboradores responsáveis por essa atribuição.': 'Share the information with the team members responsible for this task.',
   'É preciso realizar mais testes dessa operação com o uso dos coletores e definir quem serão as pessoas designadas para o uso.': 'More testing is needed for this operation using the handheld scanners, and the designated users still need to be determined.'
 };
-function trActivity(name){
-  return (appLang === 'en' && ACTIVITY_I18N[name]) ? ACTIVITY_I18N[name] : name;
+// ---- Free-text translation PT → EN (everything typed into the site) -----
+// Order: 1) the curated dictionaries above, 2) a shared cache in Supabase
+// (wms_translations), 3) Chrome's built-in on-device Translator for anything
+// new. Whatever the on-device translator produces is saved to the shared
+// cache, so once any EN viewer has seen a text, everyone — on any browser —
+// gets it in English. Nothing is sent to an outside translation service.
+const TR = { cache: new Map(), queue: new Set(), failed: new Set(), translator: null, creating: null,
+             unsupported: false, busy: false, flushTimer: null };
+function trText(text){
+  if(appLang !== 'en' || !text) return text;
+  const key = String(text).trim();
+  if(!key) return text;
+  if(ACTIVITY_I18N[key]) return ACTIVITY_I18N[key];
+  if(NOTES_I18N[key]) return NOTES_I18N[key];
+  if(TR.cache.has(key)) return TR.cache.get(key);
+  if(!TR.failed.has(key)) queueTranslation(key);
+  return text;
 }
-function trNotes(text){
-  return (appLang === 'en' && NOTES_I18N[text]) ? NOTES_I18N[text] : text;
+function trActivity(name){ return trText(name); }
+function trNotes(text){ return trText(text); }
+// People's names are never machine-translated — only the "e" joining them.
+function trNames(s){ return (appLang === 'en' && s) ? String(s).replace(/(\S)\s+e\s+(?=\S)/g, '$1 and ') : s; }
+function namesToPt(s){ return (appLang === 'en' && s) ? String(s).replace(/(\S)\s+and\s+(?=\S)/gi, '$1 e ') : s; }
+
+// Table text fields: when EN shows a translation, the field is read-only so
+// a stray edit can never overwrite the Portuguese original with English.
+// Editable again in PT (or when the text needed no translation).
+function textInputHtml(cls, a, prop, display, extra){
+  const orig = a[prop] || '';
+  const shown = display(orig);
+  const ro = appLang === 'en' && shown !== orig;
+  return '<input type="text" class="' + cls + '" data-id="' + escapeHtml(a.id) + '" value="' + escapeHtml(shown) + '"' + (extra || '')
+    + (ro ? ' readonly title="' + escapeHtml(I18N.en.notesReadonlyHint) + '"' : '') + '>';
 }
-// Renders the notes <input>: translated + read-only in EN (when a
-// translation exists) so a stray edit can never overwrite the Portuguese
-// original in Supabase with English text. Editable again back in PT.
-function obsInputHtml(a){
-  const translated = trNotes(a.observacao);
-  const isTranslated = appLang === 'en' && translated !== a.observacao;
-  return `<input type="text" class="obs-input" data-id="${escapeHtml(a.id)}" value="${escapeHtml(translated)}"${isTranslated ? ' readonly title="' + (I18N.en.notesReadonlyHint) + '"' : ''}>`;
+function obsInputHtml(a){ return textInputHtml('obs-input', a, 'observacao', trNotes); }
+
+function updateTrStatus(){
+  const el = document.getElementById('trStatus');
+  if(!el) return;
+  const on = appLang === 'en' && TR.busy;
+  el.textContent = on ? (I18N.en.translating) : '';
+  el.classList.toggle('show', on);
 }
+function queueTranslation(key){
+  if(TR.unsupported || key.length > 2000){ TR.failed.add(key); return; }
+  TR.queue.add(key);
+  clearTimeout(TR.flushTimer);
+  TR.flushTimer = setTimeout(flushTranslations, 60);
+}
+async function getTranslator(){
+  if(TR.translator) return TR.translator;
+  if(TR.unsupported) return null;
+  if(!('Translator' in self)){ TR.unsupported = true; return null; }
+  if(TR.creating) return TR.creating;
+  TR.creating = (async () => {
+    try{
+      const av = await Translator.availability({sourceLanguage:'pt', targetLanguage:'en'});
+      if(av === 'unavailable'){ TR.unsupported = true; return null; }
+      // The first use downloads the language model, which Chrome only allows
+      // right after a click/keypress — the EN button itself counts.
+      if(av !== 'available' && !(navigator.userActivation && navigator.userActivation.isActive)) return null;
+      TR.translator = await Translator.create({sourceLanguage:'pt', targetLanguage:'en'});
+      return TR.translator;
+    }catch(e){ console.warn('On-device translator unavailable:', e); return null; }
+    finally{ TR.creating = null; }
+  })();
+  return TR.creating;
+}
+async function flushTranslations(){
+  if(TR.busy || !TR.queue.size || appLang !== 'en') return;
+  TR.busy = true; updateTrStatus();
+  try{
+    if(TR.ready) await TR.ready;
+    const tr = await getTranslator();
+    if(!tr) return;                              // stays queued; retried on the next click/keypress
+    const batch = [...TR.queue].filter(k => !TR.cache.has(k));
+    TR.queue.clear();
+    const rows = [];
+    for(const key of batch){
+      try{
+        const out = String(await tr.translate(key) || '').trim();
+        if(out){ TR.cache.set(key, out); rows.push({src: key, lang: 'en', translated: out, origin: 'auto'}); }
+        else TR.failed.add(key);
+      }catch(e){ TR.failed.add(key); }
+    }
+    if(rows.length){
+      rerenderTranslated();
+      if(sb){
+        try{
+          const { error } = await sb.from('wms_translations').upsert(rows, {onConflict: 'src,lang', ignoreDuplicates: true});
+          if(error) throw error;
+        }catch(e){ console.warn('Could not share translations:', e); }
+      }
+    }
+  }finally{
+    TR.busy = false; updateTrStatus();
+    if(TR.queue.size && TR.translator) setTimeout(flushTranslations, 0);   // texts that arrived meanwhile
+  }
+}
+function rerenderTranslated(){
+  if(appLang !== 'en') return;
+  if(typeof activitiesLoaded !== 'undefined' && activitiesLoaded) renderActivities();
+  if(typeof errorsLoaded !== 'undefined' && errorsLoaded) renderErrors();
+}
+async function loadTranslations(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('wms_translations').select('src,translated').eq('lang', 'en');
+    if(error) throw error;
+    let changed = false;
+    (data || []).forEach(r => { if(TR.cache.get(r.src) !== r.translated){ TR.cache.set(r.src, r.translated); changed = true; } });
+    if(changed) rerenderTranslated();
+  }catch(e){ console.warn('Could not load shared translations:', e); }
+}
+// If the model couldn't be prepared yet (no click since the page opened in
+// EN), any later click or keypress retries.
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
+  if(appLang === 'en' && TR.queue.size && !TR.translator && !TR.unsupported && !TR.busy) flushTranslations();
+}, true));
 let appLang = 'pt';
 try{ appLang = localStorage.getItem('wmsAppLang') || 'pt'; }catch(err){}
 
@@ -1225,6 +1357,21 @@ function applyAppLang(lang){
   set('ovErrLblPend', t.ovErrLblPend);
   set('ovErrLblNo', t.ovErrLblNo);
   set('ovErrLblYes', t.ovErrLblYes);
+  set('rErrSectionTitle', t.ovErrSectionTitle);
+  set('rErrLblTotal', t.ovErrLblTotal);
+  set('rErrLblPend', t.ovErrLblPend);
+  set('rErrLblNo', t.ovErrLblNo);
+  set('rErrLblYes', t.ovErrLblYes);
+  document.title = t.docTitle;
+  document.querySelectorAll('.i18n-loading').forEach(el => { el.textContent = t.loading; });
+  // default "responsible" in the add forms follows the language (saved in PT)
+  ['newSuporte', 'errResp'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(!el.value || /^Loiue (e|and) Yoi$/.test(el.value)) el.value = trNames('Loiue e Yoi');
+    if(el.placeholder) el.placeholder = trNames('Loiue e Yoi');
+  });
+  updateTrStatus();
 
   // pendências tab
   set('pendTitle1', t.pendTitle1);
@@ -1323,9 +1470,9 @@ function renderResumo(){
         <tr>
           <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
           <td class="${statusClass(a)}">${statusLabel(a)}</td>
-          <td>${escapeHtml(a.colaborador) || '—'}</td>
+          <td>${escapeHtml(trNames(a.colaborador)) || '—'}</td>
           <td>${escapeHtml(trNotes(a.observacao))}</td>
-          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(a.planoAcao) : t.aDefinir}</td>
+          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(trText(a.planoAcao)) : t.aDefinir}</td>
         </tr>`).join('')
     : `<tr><td colspan="5" class="empty">${t.emptyPending}</td></tr>`;
 
@@ -1333,7 +1480,7 @@ function renderResumo(){
     ? official.map(a => `
         <tr>
           <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
-          <td>${escapeHtml(a.colaborador) || '—'}</td>
+          <td>${escapeHtml(trNames(a.colaborador)) || '—'}</td>
           <td>${fmtDate(a.completedAt)}</td>
         </tr>`).join('')
     : `<tr><td colspan="3" class="empty">${t.emptyDone}</td></tr>`;
@@ -1871,7 +2018,7 @@ function updateOverview(){
       if(a.official){ pct = 100; color = '#1a9c5b'; label = t.pillOfficial; }
       else if(a.informalStatus === 'OK'){ pct = 55; color = '#b9780a'; label = t.pillTestedPending; }
       else { pct = 15; color = '#c81d25'; label = t.pillNotTested; }
-      const colabTxt = (a.colaborador || '').trim();
+      const colabTxt = trNames((a.colaborador || '').trim());
       return `
         <div class="breakdown-row">
           <div class="name">${escapeHtml(trActivity(a.processo))}${colabTxt ? `<br><span style="font-weight:400;color:var(--muted);font-size:11.5px;">${escapeHtml(colabTxt)}</span>` : ''}</div>
@@ -1894,6 +2041,9 @@ function renderErrors(){
   document.getElementById('ovErrPend').textContent = pend;
   document.getElementById('ovErrNo').textContent = no;
   document.getElementById('ovErrYes').textContent = yes;
+  [['rErrTotal', errors.length], ['rErrPend', pend], ['rErrNo', no], ['rErrYes', yes]].forEach(([id, v]) => {
+    const el = document.getElementById(id); if(el) el.textContent = v;
+  });
 
   if(!errors.length){
     list.innerHTML = `<p class="empty">${t.emptyErrors}</p>`;
@@ -1918,10 +2068,10 @@ function renderErrors(){
   ` + sorted.map(e => `
     <div class="err-grid" data-id="${escapeHtml(e.id)}">
       <div>${fmtDate(e.date)}</div>
-      <div>${escapeHtml(e.description)}</div>
-      <div>${escapeHtml(e.cause)}</div>
-      <div>${escapeHtml(e.actionPlan)}</div>
-      <div>${escapeHtml(e.responsible)}</div>
+      <div>${escapeHtml(trText(e.description))}</div>
+      <div>${escapeHtml(trText(e.cause))}</div>
+      <div>${escapeHtml(trText(e.actionPlan))}</div>
+      <div>${escapeHtml(trNames(e.responsible))}</div>
       <div>${fixedSelect(e)}</div>
       <div><button class="btn danger del-error" type="button" data-id="${escapeHtml(e.id)}" title="${t.removeLabel}" aria-label="${t.removeLabel}">×</button></div>
     </div>
@@ -2044,7 +2194,11 @@ async function loadErrors(){
 // Coalesces bursts (realtime echo of our own write + the explicit reload).
 function scheduleReload(kind, delay){
   clearTimeout(reloadTimers[kind]);
-  reloadTimers[kind] = setTimeout(() => { kind === 'errors' ? loadErrors() : loadActivities(); }, delay == null ? 150 : delay);
+  reloadTimers[kind] = setTimeout(() => {
+    if(kind === 'errors') loadErrors();
+    else if(kind === 'translations') loadTranslations();
+    else loadActivities();
+  }, delay == null ? 150 : delay);
 }
 
 async function init(){
@@ -2062,6 +2216,8 @@ async function init(){
     return;
   }
 
+  TR.ready = loadTranslations();               // English for everything typed so far
+  await TR.ready;
   await Promise.all([loadActivities(), loadErrors()]);
 
   // Live sync: whenever anyone changes the data (this viewer or another), refresh.
@@ -2071,10 +2227,13 @@ async function init(){
   sb.channel('wms_errors_changes')
     .on('postgres_changes', {event:'*', schema:'public', table:'wms_errors'}, () => scheduleReload('errors'))
     .subscribe();
+  sb.channel('wms_translations_changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'wms_translations'}, () => scheduleReload('translations'))
+    .subscribe();
 
   // Safety nets for realtime events missed while the laptop slept, the
   // network dropped or the socket was reconnecting.
-  const resync = () => { scheduleReload('activities', 0); scheduleReload('errors', 0); };
+  const resync = () => { scheduleReload('translations', 0); scheduleReload('activities', 0); scheduleReload('errors', 0); };
   document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') resync(); });
   window.addEventListener('online', resync);
   setInterval(() => { if(document.visibilityState === 'visible') resync(); }, 60000);
@@ -2136,9 +2295,9 @@ async function addActivity(){
   const proc = procEl.value.trim();
   if(!proc){ flashInvalid(procEl, t.requiredProc); return; }
   if(!needDb()) return;
-  const colab = document.getElementById('newColab').value.trim();
+  const colab = namesToPt(document.getElementById('newColab').value.trim());
   const obs = document.getElementById('newObs').value.trim();
-  const suporte = document.getElementById('newSuporte').value.trim() || 'Loiue e Yoi';
+  const suporte = namesToPt(document.getElementById('newSuporte').value.trim()) || 'Loiue e Yoi';
   // max+1 (not count+1): after a delete, count+1 can repeat an existing position
   const maxOrder = activities.reduce((m, a) => Math.max(m, Number(a.order) || 0), 0);
   btn.disabled = true;
@@ -2172,7 +2331,7 @@ async function addError(){
   const date = isIsoDate(dateVal) ? dateVal : localISODate();
   const cause = document.getElementById('errCause').value.trim();
   const plan = document.getElementById('errPlan').value.trim();
-  const resp = document.getElementById('errResp').value.trim() || 'Loiue e Yoi';
+  const resp = namesToPt(document.getElementById('errResp').value.trim()) || 'Loiue e Yoi';
   const fixed = document.getElementById('errFixed').value;
   btn.disabled = true;
   try{
@@ -2200,8 +2359,9 @@ function initUiActions(){
     if(!el || el.type !== 'text' || el.readOnly || !el.dataset || !el.dataset.id) return;
     const cls = Object.keys(TEXT_FIELD_COL).find(c => el.classList.contains(c));
     if(!cls || el.value === el.defaultValue) return;
-    const id = el.dataset.id, key = id + '|' + cls, value = el.value;
-    el.defaultValue = value;                     // mark as saved so it isn't sent twice
+    const id = el.dataset.id, key = id + '|' + cls;
+    el.defaultValue = el.value;                  // mark as saved so it isn't sent twice
+    const value = (cls === 'colab-input' || cls === 'suporte-input') ? namesToPt(el.value) : el.value;
     const row = activities.find(a => a.id === id);
     if(row && row[TEXT_FIELD_PROP[cls]] === value) return;
     if(inFlightText.get(key) === value) return;
