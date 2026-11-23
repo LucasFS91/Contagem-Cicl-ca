@@ -1181,7 +1181,7 @@ const NOTES_I18N = {
 // new. Whatever the on-device translator produces is saved to the shared
 // cache, so once any EN viewer has seen a text, everyone — on any browser —
 // gets it in English. Nothing is sent to an outside translation service.
-const TR = { cache: new Map(), queue: new Set(), failed: new Set(), translator: null, creating: null,
+const TR = { cache: new Map(), queue: new Set(), failed: new Set(), translator: null, creating: null, pendingCreate: null,
              unsupported: false, busy: false, flushTimer: null };
 function trText(text){
   if(appLang !== 'en' || !text) return text;
@@ -1235,9 +1235,18 @@ async function getTranslator(){
       if(av === 'unavailable'){ TR.unsupported = true; return null; }
       // The first use downloads the language model, which Chrome only allows
       // right after a click/keypress — the EN button itself counts.
-      if(av !== 'available' && !(navigator.userActivation && navigator.userActivation.isActive)) return null;
-      TR.translator = await Translator.create({sourceLanguage:'pt', targetLanguage:'en'});
-      return TR.translator;
+      if(!TR.pendingCreate){
+        if(av !== 'available' && !(navigator.userActivation && navigator.userActivation.isActive)) return null;
+        TR.pendingCreate = Translator.create({sourceLanguage:'pt', targetLanguage:'en'})
+          .then(t => { TR.translator = t; return t; }, e => { console.warn('On-device translator unavailable:', e); return null; });
+        TR.pendingCreate.then(t => {
+          TR.pendingCreate = null;                 // a failure can be retried on a later click
+          if(t && TR.queue.size && !TR.busy) flushTranslations();
+        });
+      }
+      // First-time model download took ~2 min on Lucas's PC. Stop waiting
+      // (and hide the indicator) after 3 min; a late finish still counts.
+      return await Promise.race([TR.pendingCreate, new Promise(r => setTimeout(() => r(null), 180000))]);
     }catch(e){ console.warn('On-device translator unavailable:', e); return null; }
     finally{ TR.creating = null; }
   })();
