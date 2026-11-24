@@ -287,6 +287,22 @@
   input.invalid{border-color:var(--accent) !important;box-shadow:0 0 0 3px rgba(200,29,37,0.18) !important;}
   select.err-fixed-select{font-weight:700;cursor:pointer;color:#fff;border:none;border-radius:999px;padding:4px 10px;font-size:11.5px;width:auto;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
   .load-error{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  /* SOP / Treinamento: checkbox + date it was done (editable) */
+  .th-step{text-align:center;white-space:nowrap;}
+  .step-cell{display:flex;align-items:center;justify-content:center;gap:6px;min-width:44px;}
+  .step-cell input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#1a9c5b;margin:0;}
+  .step-cell input[type=date]{width:118px;padding:3px 6px;font-size:11.5px;}
+  /* Plano de Ação tab */
+  .plan-cards{margin-bottom:16px;}
+  .plan-table td{vertical-align:middle;}
+  .plan-table input[type=date]{width:140px;}
+  .plan-table .plano-input{width:100%;min-width:300px;}
+  .plan-table .plan-late{display:table;margin:5px 0 0 2px;}
+  .plan-table td:first-child{min-width:170px;}
+  .plan-table .plan-status{font-weight:700;cursor:pointer;color:#fff;border:none;border-radius:999px;padding:5px 12px;font-size:12px;width:auto;box-shadow:0 2px 8px rgba(0,0,0,0.18);}
+  .plan-late{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;color:#fff;background:#c81d25;border-radius:999px;padding:2px 8px;vertical-align:middle;}
+  .plan-state{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;color:#fff;white-space:nowrap;}
+  .r-plan-meta{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;}
   .tr-status{font-size:11px;color:#b8c4dc;margin-top:6px;min-height:14px;opacity:0;transition:opacity .2s ease;}
   .tr-status.show{opacity:1;}
   .tr-status.show::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px;border-radius:50%;
@@ -512,6 +528,192 @@
     body.print-resumo-only .r-table th, body.print-resumo-only .r-table td{padding:3px 6px;}
     @page{ size: letter portrait; margin: 0.35in; }
   }
+  /* ===================== Report images (Imagens tab) =====================
+     Each image is a fixed 1600×900 canvas in the boss's layout. Colours are
+     fixed (not theme variables) so the image looks the same in light and dark
+     mode, and everything is plain boxes/borders/inline SVG with explicit
+     fills — what html2canvas renders faithfully. */
+  .ig-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+  .ig-langsw{display:inline-flex;border-radius:999px;padding:3px;background:var(--glass-bg, rgba(127,127,127,0.12));border:1px solid var(--border, rgba(127,127,127,0.25));}
+  .ig-langsw button{border:none;background:transparent;color:var(--text);font:600 12.5px 'Inter',sans-serif;padding:6px 14px;border-radius:999px;cursor:pointer;}
+  .ig-langsw button.active{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;}
+  .ig-langsw .lbl{font:600 12px 'Inter',sans-serif;color:var(--muted);padding:6px 8px 6px 10px;}
+  .ig-card{margin-top:18px;}
+  .ig-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .ig-card-head h3{margin:0;font-size:16px;}
+  .ig-dl-group{display:flex;gap:8px;flex-wrap:wrap;}
+  .ig-dl{padding:8px 14px;font-size:12.5px;}
+  .ig-dl[disabled], #igDownloadAll[disabled]{opacity:.6;cursor:default;}
+  .ig-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:#fff;
+            box-shadow:0 6px 24px rgba(10,20,50,0.18);border:1px solid rgba(127,127,127,0.25);}
+  .ig-scale{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;}
+  .ig-frame .ig-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5b6474;font:500 14px 'Inter',sans-serif;}
+  .ig-offscreen{position:fixed;left:-20000px;top:0;width:1600px;height:900px;pointer-events:none;}
+  @media print{ #tab-imagens{display:none !important;} .ig-offscreen{display:none !important;} }
+
+  .ig-root{position:relative;width:1600px;height:900px;overflow:hidden;background:#ffffff;color:#0f2a6e;
+           font-family:'Inter',Arial,Helvetica,sans-serif;font-size:14px;line-height:1.2;text-align:left;
+           letter-spacing:0;font-weight:400;-webkit-font-smoothing:antialiased;}
+  .ig-root *{box-sizing:border-box;}
+  .ig-root b{font-weight:700;}
+  .ig-root svg{display:block;flex:none;}
+
+  /* header */
+  .ig-header{position:absolute;left:0;top:0;width:1600px;height:104px;}
+  .ig-logo{position:absolute;left:44px;top:14px;height:74px;width:auto;max-width:150px;}   /* no object-fit: html2canvas ignores it */
+  .ig-hsep{position:absolute;left:200px;top:16px;width:3px;height:72px;background:#0f2a6e;}
+  .ig-htitle{position:absolute;left:222px;top:8px;font-size:42px;font-weight:800;color:#0f2a6e;white-space:nowrap;letter-spacing:-0.5px;}
+  .ig-hsub{position:absolute;left:224px;top:62px;font-size:24px;font-weight:600;color:#4a5468;white-space:nowrap;}
+  .ig-stamp{position:absolute;right:250px;top:70px;font-size:14px;font-weight:600;color:#6b7484;white-space:nowrap;}
+  .ig-corner{position:absolute;right:0;top:0;}
+
+  /* panels */
+  .ig-panel{position:absolute;background:#ffffff;border:1px solid #d5dbe7;border-radius:12px;overflow:hidden;
+            box-shadow:0 2px 6px rgba(15,42,110,0.08);}
+  .ig-phead{position:absolute;left:0;top:0;right:0;height:50px;display:flex;align-items:center;gap:12px;padding:0 18px;
+            color:#ffffff;font-size:26px;font-weight:700;white-space:nowrap;}
+  .ig-phead.navy{background:linear-gradient(90deg,#0f2a6e,#1f4fb8);}
+  .ig-phead.red{background:linear-gradient(90deg,#b30e26,#e0313f);}
+
+  .ig-phead.compact{height:44px;justify-content:center;padding:0 10px;font-size:18px;}
+  .ig-node.compact span{font-size:12px;}
+  .ig-node.compact b{font-size:14.5px;}
+  .ig-hbadge{margin-left:12px;background:#2e9e4f;border-radius:14px;padding:4px 14px;font-size:16px;font-weight:700;color:#fff;}
+  .ig-hlegend{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#ffffff;}
+  .ig-hlegend span{margin-right:8px;}
+
+  /* progress */
+  .ig-pcol{position:absolute;top:58px;font-size:21px;font-weight:700;color:#1f3f9e;line-height:1.1;}
+  .ig-pcol small{display:block;font-size:18px;font-weight:500;color:#4a5468;}
+  .ig-pcol.cur{color:#1f4fb8;}
+  .ig-pcol.evo{top:70px;text-align:center;color:#1e8e3e;}
+  .ig-prow{position:absolute;left:0;right:0;height:76px;}
+  .ig-pic{position:absolute;left:22px;top:12px;}
+  .ig-plbl{position:absolute;left:90px;top:8px;width:236px;}
+  .ig-plbl b{display:block;font-size:23px;color:#0f2a6e;}
+  .ig-plbl span{display:block;font-size:20px;font-weight:500;color:#1c2a4a;margin-top:2px;}
+  .ig-pbar{position:absolute;left:330px;top:0;width:370px;}
+  .ig-pbar .nums{display:flex;justify-content:space-between;height:34px;align-items:flex-end;}
+  .ig-pbar .nums .p{font-size:27px;font-weight:700;color:#2c3e75;}
+  .ig-pbar .nums .c{font-size:27px;font-weight:700;color:#1f4fb8;}
+  .ig-pbar .track{position:relative;height:15px;border-radius:8px;background:#d9dde6;margin-top:5px;overflow:hidden;}
+  .ig-pbar .f1{position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,#1b3a94,#2f5bd3);}
+  .ig-pbar .f2{position:absolute;top:0;height:100%;background:linear-gradient(90deg,#3f6fe6,#5f8af2);}
+  .ig-pbar .note{text-align:right;font-size:17px;font-weight:700;color:#1f4fb8;margin-top:5px;}
+  .ig-evo{position:absolute;left:730px;top:16px;width:160px;height:52px;border:2.5px solid #2e9e4f;border-radius:8px;background:#eaf7ee;
+          color:#1e8e3e;font-size:32px;font-weight:800;text-align:center;line-height:47px;}
+  .ig-evo.down{border-color:#c8102e;background:#fdecef;color:#c8102e;}
+  .ig-evo.flat{border-color:#9aa3b2;background:#f1f3f7;color:#5b6474;}
+
+  /* action plan */
+  .ig-plan-row{position:absolute;left:8px;right:8px;height:50px;border-bottom:1px solid #e3e7ef;}
+  .ig-plan-row.alt{background:#f1f4fa;}
+  .ig-plan-cal{position:absolute;left:12px;top:10px;}
+  .ig-plan-date{position:absolute;left:52px;top:0;width:112px;height:50px;line-height:50px;font-size:19px;font-weight:700;color:#0f2a6e;
+                border-right:2px solid #c5ccd8;white-space:nowrap;}
+  .ig-plan-date.none{font-size:15px;font-weight:600;font-style:italic;color:#8a93a3;}
+  .ig-plan-txt{position:absolute;left:176px;right:132px;top:5px;}
+  .ig-plan-txt b{display:block;font-size:16.5px;color:#0f2a6e;white-space:nowrap;overflow:hidden;}
+  .ig-plan-txt span{display:block;font-size:14.5px;color:#3c4659;margin-top:3px;white-space:nowrap;overflow:hidden;}
+  .ig-plan-txt span.undef{font-style:italic;color:#8a93a3;}
+  .ig-chip{position:absolute;right:8px;top:12px;width:118px;height:26px;border-radius:13px;font-size:13px;font-weight:700;
+           color:#ffffff;text-align:center;line-height:26px;white-space:nowrap;}
+  .ig-chip.st-concluido{background:#1e9e52;}
+  .ig-chip.st-andamento{background:#d08a0e;}
+  .ig-chip.st-nao_iniciado{background:#6b7484;}
+  .ig-chip.st-atrasado{background:#c8102e;}
+  .ig-chip.st-indefinido{background:#e6e9ef;color:#4a5468;}
+  .ig-plan-more{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:14px;font-weight:600;font-style:italic;color:#5b6474;}
+  .ig-plan-none{position:absolute;left:0;right:0;top:120px;display:flex;align-items:center;justify-content:center;gap:14px;
+                font-size:21px;font-weight:600;color:#1e8e3e;}
+
+  /* routine & team */
+  .ig-team-row{position:absolute;left:8px;right:8px;height:48px;background:#f1f4fa;border-radius:6px;}
+  .ig-team-ic{position:absolute;left:14px;top:8px;}
+  .ig-team-who{position:absolute;left:60px;top:0;width:220px;height:48px;display:flex;flex-direction:column;justify-content:center;}
+  .ig-team-who b{display:block;font-size:19px;color:#0f2a6e;}
+  .ig-team-who span{display:block;font-size:17px;font-weight:500;color:#0f2a6e;}
+  .ig-team-what{position:absolute;left:290px;top:5px;bottom:5px;right:10px;border-left:2px solid #c5ccd8;padding-left:14px;
+                display:flex;flex-direction:column;justify-content:center;font-size:15.5px;color:#2a3346;line-height:1.3;}
+
+  /* key message (progress image) */
+  .ig-msg{position:absolute;background:#eaf5ea;border-radius:14px;border:1px solid #d3ead6;}
+  .ig-msg-ic{position:absolute;left:26px;top:54px;}
+  .ig-msg-bar{position:absolute;left:152px;top:26px;bottom:26px;width:3px;background:#1e8e3e;}
+  .ig-msg-title{position:absolute;left:174px;top:22px;font-size:34px;font-weight:800;color:#0f2a6e;}
+  .ig-msg-text{position:absolute;left:174px;top:72px;right:18px;font-size:19.5px;color:#1c2a4a;line-height:1.5;}
+  .ig-msg-text b{color:#1f4fb8;}
+
+  /* BR02 cards */
+  .ig-br-card{position:absolute;width:374px;height:52px;border-radius:7px;border:1px solid #efd98c;background:#fff8e0;}
+  .ig-br-card.st-tested{border-color:#f0c27a;background:#fff1dc;}
+  .ig-br-card.st-pending{border-color:#efb5bd;background:#fdeef0;}
+  .ig-br-card.st-none{border-color:#d5dbe7;background:#f4f6fa;}
+  .ig-br-ic{position:absolute;left:10px;top:11px;}
+  .ig-br-txt{position:absolute;left:50px;right:10px;top:6px;}
+  .ig-br-txt b{display:block;font-size:16.5px;color:#0f2a6e;white-space:nowrap;}
+  .ig-br-txt span{display:block;font-size:13.5px;color:#3c4659;margin-top:2px;white-space:nowrap;}
+
+  /* flow image */
+  .ig-col{position:absolute;background:#ffffff;border:2px solid #1f4fb8;border-radius:12px;overflow:hidden;}
+  .ig-col.fut{border-color:#c8102e;}
+  .ig-colhead{position:absolute;left:0;top:0;right:0;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;}
+  .ig-colhead.navy{background:linear-gradient(90deg,#0f2a6e,#1f4fb8);}
+  .ig-colhead.red{background:linear-gradient(90deg,#b30e26,#e0313f);}
+  .ig-colhead b{font-size:27px;font-weight:800;}
+  .ig-colhead span{font-size:15.5px;font-weight:500;margin-top:3px;white-space:nowrap;}
+  .ig-colbody{position:absolute;left:0;right:0;top:72px;bottom:0;}
+  .ig-node{position:absolute;border:2px solid #2f5bd3;border-radius:8px;background:linear-gradient(180deg,#ffffff,#edf2fc);
+           padding:4px 8px;font-size:13px;color:#0f2a6e;display:flex;flex-direction:column;justify-content:center;line-height:1.18;}
+  .ig-node.center{text-align:center;align-items:center;}
+  .ig-node b{font-size:15px;font-weight:700;}
+  .ig-node span{font-size:13px;}
+  .ig-node .row{display:flex;align-items:center;gap:8px;}
+  .ig-node .row > div{display:flex;flex-direction:column;}
+  .ig-node .row.center{justify-content:center;}
+  .ig-node.red{border-color:#c8102e;background:linear-gradient(180deg,#fff6f7,#fde4e8);}
+  .ig-node.yellow{border-color:#e6b422;background:linear-gradient(180deg,#fffbea,#fff0bf);}
+  .ig-node.yellow .big b{font-size:21px;}
+  .ig-node.yellow .big span{font-size:15px;}
+  .ig-node .foot{font-size:12.5px;font-weight:700;margin-top:6px;text-align:center;}
+  .ig-node.side{justify-content:flex-start;background:#f5f8fe;padding:7px 10px;}
+  .ig-node .side-t{font-size:13.5px;font-weight:700;color:#0f2a6e;line-height:1.2;}
+  .ig-node ul{margin:4px 0 0 0;padding:0 0 0 15px;font-size:12px;line-height:1.28;}
+  .ig-node li{margin:0;}
+  .ig-node.gtag{background:linear-gradient(180deg,#36ad5a,#22883f);border-color:#22883f;color:#ffffff;}
+  .ig-node.gtag b{font-size:16px;}
+  .ig-node.gtag span{font-size:12px;}
+  .ig-node.store{justify-content:flex-start;padding:7px 12px;}
+  .ig-node.store b{font-size:14.5px;}
+  .ig-node .small{display:block;font-size:11.5px;line-height:1.3;margin-top:2px;}
+  .ig-node .row.sep{border-top:1.5px dashed #9bb0e0;margin-top:7px;padding-top:7px;}
+  .ig-node .sap{font-size:22px;color:#ffffff;background:#1f6fd6;border-radius:4px;padding:0 8px;}
+  .ig-node .swap{font-size:24px;color:#1f4fb8;}
+  .ig-node .row.center b + span, .ig-node .row.center b ~ span{margin-left:6px;}
+  .ig-ln{position:absolute;}
+  .ig-ah{position:absolute;width:0;height:0;}
+  .ig-abadge{position:absolute;width:28px;height:28px;border-radius:50%;border:2px solid #ffffff;color:#ffffff;font-size:15px;
+             font-weight:800;text-align:center;line-height:24px;}
+  .ig-nstate{position:absolute;width:24px;height:24px;border-radius:50%;background:#ffffff;padding:1px;}
+  .ig-dash{position:absolute;border:2.5px dashed #2e9e4f;border-radius:12px;}
+
+  .ig-txg{position:absolute;left:8px;right:8px;display:flex;align-items:center;border-bottom:1px solid #dde3ee;}
+  .ig-txg-h{width:140px;flex:none;display:flex;align-items:center;gap:5px;padding-right:4px;}
+  .ig-txg-h b{font-size:11px;color:#0f2a6e;line-height:1.18;}
+  .ig-txg-l{flex:1;min-width:0;border-left:1px solid #dde3ee;padding-left:6px;}
+  .ig-tx{display:flex;align-items:center;gap:4px;height:15px;font-size:10.5px;color:#1c2a4a;white-space:nowrap;overflow:hidden;}
+  .ig-tx b{font-weight:700;}
+  .ig-txleg{position:absolute;left:10px;right:10px;bottom:8px;height:20px;display:flex;align-items:center;gap:4px;font-size:11.5px;color:#3c4659;}
+  .ig-txleg span{margin-right:6px;}
+  .ig-txleg b{margin-left:auto;font-size:14px;color:#1e8e3e;}
+  .ig-imps{position:absolute;left:12px;right:10px;top:51px;}
+  .ig-imps > div{display:flex;align-items:center;gap:9px;min-height:29px;margin-bottom:2px;font-size:13.5px;color:#1c2a4a;line-height:1.22;}
+  .ig-banner{position:absolute;left:18px;top:826px;width:1564px;height:62px;border-radius:10px;background:linear-gradient(90deg,#0f2a6e,#1f4fb8);overflow:hidden;}
+  .ig-banner-l{position:absolute;left:0;top:0;bottom:0;width:330px;background:linear-gradient(90deg,#b30e26,#e0313f);}
+  .ig-banner-lin{display:flex;align-items:center;gap:12px;height:62px;padding-left:22px;}
+  .ig-banner-lin b{font-size:26px;font-weight:800;font-style:italic;color:#ffffff;}
+  .ig-banner-t{position:absolute;left:352px;right:24px;top:0;bottom:0;display:flex;align-items:center;font-size:16.5px;font-weight:700;
+               font-style:italic;color:#ffffff;line-height:1.3;}
 </style>
 </head>
 <body>
@@ -543,7 +745,9 @@
   <div class="sidebar-label" id="navMenuLabel">Menu</div>
   <button class="tab-btn active" data-tab="overview"><span id="navOverview">Visão Geral</span></button>
   <button class="tab-btn" data-tab="resumo"><span id="navResumo">Resumo</span></button>
+  <button class="tab-btn" data-tab="imagens"><span id="navImagens">Imagens</span></button>
   <button class="tab-btn" data-tab="pendencias"><span id="navPendencias">Pendências</span></button>
+  <button class="tab-btn" data-tab="plano"><span id="navPlano">Plano de Ação</span></button>
   <button class="tab-btn" data-tab="finalizados"><span id="navFinalizados">Finalizados</span></button>
   <button class="tab-btn" data-tab="erros"><span id="navErros">Erros</span></button>
   <div class="sidebar-spacer"></div>
@@ -710,6 +914,43 @@
     </section>
   </section>
 
+  <!-- ======================= IMAGENS (relatórios em imagem) ======================= -->
+  <section class="tab-panel" id="tab-imagens">
+    <section class="panel">
+      <div class="ig-toolbar">
+        <div>
+          <h2 id="imgTitle" style="margin-bottom:4px;">Imagens para o relatório</h2>
+          <p class="hint" id="imgHint" style="margin:0;">Geradas a partir dos dados do site e atualizadas automaticamente a cada mudança de status, SOP, treinamento ou plano de ação.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="ig-langsw" id="igLangSw"><span class="lbl" id="imgPrevLbl">Prévia</span><button type="button" data-iglang="pt">PT</button><button type="button" data-iglang="en">EN</button></div>
+          <button class="btn" id="igDownloadAll" type="button">⬇&nbsp; <span id="imgDlAll">Baixar as 4 (PT + EN)</span></button>
+        </div>
+      </div>
+      <div class="ig-card">
+        <div class="ig-card-head">
+          <h3 id="imgProgTitle">Implementação do WMS – Progresso e Plano de Ação</h3>
+          <div class="ig-dl-group">
+            <button class="btn ig-dl" type="button" data-ig="progress" data-lang="pt">⬇ <span class="imgDlPt">PNG Português</span></button>
+            <button class="btn ig-dl" type="button" data-ig="progress" data-lang="en">⬇ <span class="imgDlEn">PNG English</span></button>
+          </div>
+        </div>
+        <div class="ig-frame" id="igFrame-progress"></div>
+      </div>
+      <div class="ig-card">
+        <div class="ig-card-head">
+          <h3 id="imgFlowTitle">Fluxo do Armazém – Atual vs. Futuro (SAP + WMS)</h3>
+          <div class="ig-dl-group">
+            <button class="btn ig-dl" type="button" data-ig="flow" data-lang="pt">⬇ <span class="imgDlPt">PNG Português</span></button>
+            <button class="btn ig-dl" type="button" data-ig="flow" data-lang="en">⬇ <span class="imgDlEn">PNG English</span></button>
+          </div>
+        </div>
+        <div class="ig-frame" id="igFrame-flow"></div>
+      </div>
+      <p class="hint" id="imgNote" style="margin-top:14px;">✓ validada (oficialmente concluída) · ◐ testada · ○ pendente · — fora do site. Transações que ainda não existem como atividade no site (00ZT, DEP 1600, DEP 1200) passam a acompanhar o status assim que forem cadastradas com o código no nome.</p>
+    </section>
+  </section>
+
   <!-- ======================= PENDÊNCIAS ======================= -->
   <section class="tab-panel" id="tab-pendencias">
     <section class="panel">
@@ -717,8 +958,8 @@
       <p class="hint" id="pendHint1">Processos com teste informal "OK", mas ainda sem confirmação oficial de conclusão (treinamento formal com presença registrada).</p>
       <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th style="width:36px;" id="pendT1h1">Oficial</th><th id="pendT1h2">Processo</th><th id="pendT1h3">Status</th><th id="pendT1h4">Observação</th><th id="pendT1h5">Colaborador</th><th id="pendT1h6">Suporte WMS</th><th id="pendT1h7">Plano de Ação</th><th style="width:30px;"></th></tr></thead>
-        <tbody id="bodyTestedPending"><tr><td colspan="8" class="empty i18n-loading">Carregando...</td></tr></tbody>
+        <thead><tr><th style="width:36px;" id="pendT1h1">Oficial</th><th id="pendT1h2">Processo</th><th id="pendT1h3">Status</th><th id="pendT1h4">Observação</th><th id="pendT1h5">Colaborador</th><th id="pendT1h6">Suporte WMS</th><th id="pendT1h7" class="th-step">SOP</th><th id="pendT1h8" class="th-step">Treinamento</th><th style="width:30px;"></th></tr></thead>
+        <tbody id="bodyTestedPending"><tr><td colspan="9" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
     </section>
@@ -727,8 +968,8 @@
       <p class="hint" id="pendHint2">Processos cujo treinamento ainda não foi realizado.</p>
       <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th style="width:36px;" id="pendT2h1">Oficial</th><th id="pendT2h2">Processo</th><th id="pendT2h3">Status</th><th id="pendT2h4">Observação</th><th id="pendT2h5">Colaborador</th><th id="pendT2h6">Suporte WMS</th><th id="pendT2h7">Plano de Ação</th><th style="width:30px;"></th></tr></thead>
-        <tbody id="bodyNotTested"><tr><td colspan="8" class="empty i18n-loading">Carregando...</td></tr></tbody>
+        <thead><tr><th style="width:36px;" id="pendT2h1">Oficial</th><th id="pendT2h2">Processo</th><th id="pendT2h3">Status</th><th id="pendT2h4">Observação</th><th id="pendT2h5">Colaborador</th><th id="pendT2h6">Suporte WMS</th><th id="pendT2h7" class="th-step">SOP</th><th id="pendT2h8" class="th-step">Treinamento</th><th style="width:30px;"></th></tr></thead>
+        <tbody id="bodyNotTested"><tr><td colspan="9" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
       <div class="add-row">
@@ -741,6 +982,35 @@
     </section>
   </section>
 
+  <!-- ======================= PLANO DE AÇÃO ======================= -->
+  <section class="tab-panel" id="tab-plano">
+    <section class="panel">
+      <h2 id="planTitle">Plano de Ação por atividade</h2>
+      <p class="hint" id="planHint">Para cada atividade pendente: o que será feito, até quando e se já foi realizado. Aparece no Resumo e na imagem de Progresso.</p>
+      <div class="cards plan-cards">
+        <div class="card"><div class="label" id="planLblOpen">Atividades pendentes</div><div class="value" id="planKpiOpen">—</div></div>
+        <div class="card green"><div class="label" id="planLblWith">Com plano definido</div><div class="value" id="planKpiWith">—</div></div>
+        <div class="card amber"><div class="label" id="planLblDone">Planos realizados</div><div class="value" id="planKpiDone">—</div></div>
+        <div class="card red"><div class="label" id="planLblLate">Atrasados</div><div class="value" id="planKpiLate">—</div></div>
+      </div>
+      <div style="overflow-x:auto;">
+      <table class="plan-table">
+        <thead><tr><th id="planTh1">Processo</th><th id="planTh2">Status atual</th><th id="planTh3">Plano de Ação</th><th id="planTh4" style="width:150px;">Prazo</th><th id="planTh5">Colaborador</th><th id="planTh6" style="width:170px;">Situação</th></tr></thead>
+        <tbody id="bodyPlano"><tr><td colspan="6" class="empty i18n-loading">Carregando...</td></tr></tbody>
+      </table>
+      </div>
+    </section>
+    <section class="panel" id="planDonePanel" style="display:none;">
+      <h2 id="planDoneTitle">Planos de atividades já concluídas</h2>
+      <div style="overflow-x:auto;">
+      <table class="plan-table">
+        <thead><tr><th id="planTh7">Processo</th><th id="planTh8">Plano de Ação</th><th id="planTh9">Prazo</th><th id="planTh10">Situação</th></tr></thead>
+        <tbody id="bodyPlanoDone"></tbody>
+      </table>
+      </div>
+    </section>
+  </section>
+
   <!-- ======================= FINALIZADOS ======================= -->
   <section class="tab-panel" id="tab-finalizados">
     <section class="panel">
@@ -748,8 +1018,8 @@
       <p class="hint" id="finHint">Processos validados e marcados como oficialmente finalizados, com data de conclusão.</p>
       <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th style="width:36px;" id="finTh1">Oficial</th><th id="finTh2">Processo</th><th id="finTh3">Concluído em</th><th id="finTh4">Observação</th><th id="finTh5">Colaborador</th><th id="finTh6">Suporte WMS</th></tr></thead>
-        <tbody id="bodyFinalizados"><tr><td colspan="6" class="empty i18n-loading">Carregando...</td></tr></tbody>
+        <thead><tr><th style="width:36px;" id="finTh1">Oficial</th><th id="finTh2">Processo</th><th id="finTh3">Concluído em</th><th id="finTh4">Observação</th><th id="finTh5">Colaborador</th><th id="finTh6">Suporte WMS</th><th id="finTh7" class="th-step">SOP</th><th id="finTh8" class="th-step">Treinamento</th></tr></thead>
+        <tbody id="bodyFinalizados"><tr><td colspan="8" class="empty i18n-loading">Carregando...</td></tr></tbody>
       </table>
       </div>
     </section>
@@ -837,6 +1107,7 @@ function setTab(name){
   if(location.hash.slice(1) !== name){
     try{ history.replaceState(null, '', '#' + name); }catch(e){}
   }
+  if(name === 'imagens' && typeof renderInfographicPreviews === 'function') renderInfographicPreviews();
 }
 document.getElementById('tabNav').addEventListener('click', (e) => {
   const btn = e.target.closest('.tab-btn');
@@ -844,7 +1115,7 @@ document.getElementById('tabNav').addEventListener('click', (e) => {
 });
 window.addEventListener('hashchange', () => {
   const h = location.hash.slice(1);
-  if(['overview','resumo','pendencias','finalizados','erros'].includes(h)) setTab(h);
+  if(TABS.includes(h)) setTab(h);
 });
 
 /* ---------- Activity rendering ---------- */
@@ -858,7 +1129,8 @@ function rowHtml(a){
       <td>${obsInputHtml(a)}</td>
       <td>${textInputHtml('colab-input', a, 'colaborador', trNames)}</td>
       <td>${textInputHtml('suporte-input', a, 'responsavelSistema', trNames)}</td>
-      <td>${textInputHtml('plano-input', a, 'planoAcao', trText, ' placeholder="' + t.aDefinir + '"')}</td>
+      <td>${stepCellHtml(a, 'sop')}</td>
+      <td>${stepCellHtml(a, 'trained')}</td>
       <td><button class="btn danger del-activity" type="button" data-id="${escapeHtml(a.id)}" title="${t.removeLabel}" aria-label="${t.removeLabel}">×</button></td>
     </tr>`;
 }
@@ -868,7 +1140,7 @@ function rowHtml(a){
 // the user was in the middle of typing would vanish and the field would
 // lose focus. Text fields save on focusout when value !== defaultValue, so
 // a restored, still-unsaved value is saved normally when they leave it.
-const EDITABLE_CLASSES = ['obs-input','colab-input','suporte-input','plano-input','status-select','official-cb','err-fixed-select'];
+const EDITABLE_CLASSES = ['obs-input','colab-input','suporte-input','plano-input','status-select','official-cb','err-fixed-select','step-cb','step-date','plan-date','plan-status'];
 function captureFocus(){
   const el = document.activeElement;
   if(!el || !el.dataset || !el.dataset.id) return null;
@@ -876,7 +1148,7 @@ function captureFocus(){
   if(!cls) return null;
   const isText = el.type === 'text';
   return {
-    id: el.dataset.id, cls, isText,
+    id: el.dataset.id, cls, isText, kind: el.dataset.kind || '',
     value: el.value,
     dirty: isText && el.value !== el.defaultValue,
     selStart: isText ? el.selectionStart : null,
@@ -885,7 +1157,7 @@ function captureFocus(){
 }
 function restoreFocus(state){
   if(!state) return;
-  const el = document.querySelector('.' + state.cls + '[data-id="' + cssEsc(state.id) + '"]');
+  const el = document.querySelector('.' + state.cls + '[data-id="' + cssEsc(state.id) + '"]' + (state.kind ? '[data-kind="' + cssEsc(state.kind) + '"]' : ''));
   if(!el) return;
   if(state.dirty && !el.readOnly) el.value = state.value;
   try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
@@ -904,11 +1176,11 @@ function renderActivities(){
 
   document.getElementById('bodyTestedPending').innerHTML = testedPending.length
     ? testedPending.map(rowHtml).join('')
-    : `<tr><td colspan="8" class="empty">${t.emptyCategory}</td></tr>`;
+    : `<tr><td colspan="9" class="empty">${t.emptyCategory}</td></tr>`;
 
   document.getElementById('bodyNotTested').innerHTML = notTested.length
     ? notTested.map(rowHtml).join('')
-    : `<tr><td colspan="8" class="empty">${t.emptyCategory}</td></tr>`;
+    : `<tr><td colspan="9" class="empty">${t.emptyCategory}</td></tr>`;
 
   document.getElementById('bodyFinalizados').innerHTML = official.length
     ? official.map(a => `
@@ -919,12 +1191,105 @@ function renderActivities(){
           <td>${obsInputHtml(a)}</td>
           <td>${textInputHtml('colab-input', a, 'colaborador', trNames)}</td>
           <td>${textInputHtml('suporte-input', a, 'responsavelSistema', trNames)}</td>
+          <td>${stepCellHtml(a, 'sop')}</td>
+          <td>${stepCellHtml(a, 'trained')}</td>
         </tr>`).join('')
-    : `<tr><td colspan="6" class="empty">${t.emptyFinalizados}</td></tr>`;
+    : `<tr><td colspan="8" class="empty">${t.emptyFinalizados}</td></tr>`;
 
+  renderPlano();
   updateOverview();
   renderResumo();
+  if(typeof renderInfographicPreviews === 'function') renderInfographicPreviews();
   restoreFocus(focusState);
+}
+
+// SOP / Treinamento cell: checkbox + the date it was done (editable, so
+// things registered late can be back-dated — the "Anterior" column of the
+// Progress image is computed from these dates).
+function stepCellHtml(a, kind){
+  const t = I18N[appLang] || I18N.pt;
+  const on = kind === 'sop' ? a.sop : a.trained;
+  const at = kind === 'sop' ? a.sopAt : a.trainedAt;
+  const id = escapeHtml(a.id);
+  return '<div class="step-cell"><input type="checkbox" class="step-cb" data-kind="' + kind + '" data-id="' + id + '"' + (on ? ' checked' : '')
+    + ' aria-label="' + escapeHtml(kind === 'sop' ? t.stepSopAria : t.stepTreinoAria) + '">'
+    + (on ? '<input type="date" class="step-date" data-kind="' + kind + '" data-id="' + id + '" value="' + (isIsoDate(at) ? at : '') + '" title="' + escapeHtml(t.stepDateTitle) + '">' : '')
+    + '</div>';
+}
+
+/* ---------- Plano de Ação ---------- */
+const PLAN_BG = {
+  nao_iniciado: 'linear-gradient(135deg,#5b6474,#7b8494)',
+  andamento: 'linear-gradient(135deg,#b9780a,#e0a73a)',
+  concluido: 'linear-gradient(135deg,#1a9c5b,#2ec27e)'
+};
+// "Situação" shown everywhere (site, Resumo, image): done / in progress /
+// not done, plus overdue (due date passed, not done) and "to be defined".
+function planState(a){
+  const st = PLAN_BG[a.planoStatus] ? a.planoStatus : 'nao_iniciado';
+  if(st === 'concluido') return 'concluido';
+  if(isIsoDate(a.planoPrazo) && a.planoPrazo < localISODate()) return 'atrasado';
+  if(!String(a.planoAcao || '').trim()) return 'indefinido';
+  return st;
+}
+function planPrazoLabel(iso, lang){
+  if(!isIsoDate(iso)) return '';
+  const p = iso.split('-').map(Number);
+  const d = new Date(p[0], p[1]-1, p[2]);
+  return (lang || appLang) === 'en'
+    ? d.toLocaleDateString('en-US', {month:'short', day:'numeric'})
+    : String(p[2]).padStart(2,'0') + '/' + String(p[1]).padStart(2,'0');
+}
+function planSorted(list){
+  // overdue first, then by due date, undated last, then the usual order
+  return [...list].sort((a, b) => {
+    const la = planState(a) === 'atrasado' ? 0 : 1, lb = planState(b) === 'atrasado' ? 0 : 1;
+    if(la !== lb) return la - lb;
+    const da = isIsoDate(a.planoPrazo) ? a.planoPrazo : '9999', db = isIsoDate(b.planoPrazo) ? b.planoPrazo : '9999';
+    if(da !== db) return da < db ? -1 : 1;
+    return byOrder(a, b);
+  });
+}
+function renderPlano(){
+  const body = document.getElementById('bodyPlano');
+  if(!body) return;
+  const t = I18N[appLang] || I18N.pt;
+  const open = planSorted(activities.filter(a => !a.official));
+  const doneWithPlan = planSorted(activities.filter(a => a.official && String(a.planoAcao || '').trim()));
+  const setK = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setK('planKpiOpen', open.length);
+  setK('planKpiWith', open.filter(a => String(a.planoAcao || '').trim()).length);
+  setK('planKpiDone', open.filter(a => a.planoStatus === 'concluido').length);
+  setK('planKpiLate', open.filter(a => planState(a) === 'atrasado').length);
+  const statusPill = a => a.informalStatus === 'OK'
+    ? '<span class="plan-state" style="background:#b9780a;">' + escapeHtml(t.pillTestedPending) + '</span>'
+    : '<span class="plan-state" style="background:#c81d25;">' + escapeHtml(t.pillNotTested) + '</span>';
+  const sitSelect = a => {
+    const st = PLAN_BG[a.planoStatus] ? a.planoStatus : 'nao_iniciado';
+    return '<select class="plan-status" data-id="' + escapeHtml(a.id) + '" style="background:' + PLAN_BG[st] + ';" aria-label="' + escapeHtml(t.planThSit) + '">'
+      + ['nao_iniciado','andamento','concluido'].map(k => '<option value="' + k + '"' + (k === st ? ' selected' : '') + '>' + escapeHtml(t.planSt[k]) + '</option>').join('')
+      + '</select>' + (planState(a) === 'atrasado' ? '<span class="plan-late">' + escapeHtml(t.planLate) + '</span>' : '');
+  };
+  body.innerHTML = open.length ? open.map(a => `
+    <tr data-id="${escapeHtml(a.id)}">
+      <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
+      <td>${statusPill(a)}</td>
+      <td>${textInputHtml('plano-input', a, 'planoAcao', trText, ' placeholder="' + escapeHtml(t.aDefinir) + '"')}</td>
+      <td><input type="date" class="plan-date" data-id="${escapeHtml(a.id)}" value="${isIsoDate(a.planoPrazo) ? a.planoPrazo : ''}"></td>
+      <td>${escapeHtml(trNames(a.colaborador)) || '—'}</td>
+      <td style="white-space:nowrap;">${sitSelect(a)}</td>
+    </tr>`).join('') : `<tr><td colspan="6" class="empty">${escapeHtml(t.planNone)}</td></tr>`;
+  const donePanel = document.getElementById('planDonePanel');
+  if(donePanel){
+    donePanel.style.display = doneWithPlan.length ? '' : 'none';
+    document.getElementById('bodyPlanoDone').innerHTML = doneWithPlan.map(a => `
+      <tr data-id="${escapeHtml(a.id)}">
+        <td class="proc-name">${escapeHtml(trActivity(a.processo))}</td>
+        <td>${textInputHtml('plano-input', a, 'planoAcao', trText)}</td>
+        <td><input type="date" class="plan-date" data-id="${escapeHtml(a.id)}" value="${isIsoDate(a.planoPrazo) ? a.planoPrazo : ''}"></td>
+        <td style="white-space:nowrap;">${sitSelect(a)}</td>
+      </tr>`).join('');
+  }
 }
 
 // ---- Resumo language toggle (PT/EN) ------------------------------------
@@ -957,6 +1322,23 @@ const I18N = {
     navPendencias:'Pendências',
     navFinalizados:'Finalizados',
     navErros:'Erros',
+    navPlano:'Plano de Ação',
+    navImagens:'Imagens',
+    thSop:'SOP', thTreino:'Treinamento',
+    stepSopAria:'SOP aprovado', stepTreinoAria:'Treinamento realizado', stepDateTitle:'Data em que foi feito (vazio = antes do acompanhamento)',
+    planTitle:'Plano de Ação por atividade',
+    planHint:'Para cada atividade pendente: o que será feito, até quando e se já foi realizado. Aparece no Resumo e na imagem de Progresso.',
+    planLblOpen:'Atividades pendentes', planLblWith:'Com plano definido', planLblDone:'Planos realizados', planLblLate:'Atrasados',
+    planThProc:'Processo', planThStatus:'Status atual', planThPlan:'Plano de Ação', planThPrazo:'Prazo', planThColab:'Colaborador', planThSit:'Situação',
+    planDoneTitle:'Planos de atividades já concluídas',
+    planSt:{nao_iniciado:'Não realizado', andamento:'Em andamento', concluido:'Realizado'},
+    planLate:'Atrasado', planUndefined:'A definir', planNone:'Nenhuma atividade pendente.', planDue:'prazo',
+    imgTitle:'Imagens para o relatório',
+    imgHint:'Geradas a partir dos dados do site e atualizadas automaticamente a cada mudança de status, SOP, treinamento ou plano de ação.',
+    imgPrevLbl:'Prévia', imgDlAll:'Baixar as 4 (PT + EN)', imgDlPt:'PNG Português', imgDlEn:'PNG English',
+    imgProgTitle:'Implementação do WMS – Progresso e Plano de Ação', imgFlowTitle:'Fluxo do Armazém – Atual vs. Futuro (SAP + WMS)',
+    imgGenerating:'Gerando…', imgError:'Não foi possível gerar a imagem — tente novamente.',
+    imgNote:'✓ validada (oficialmente concluída) · ◐ testada · ○ pendente · — fora do site. Transações que ainda não existem como atividade no site (00ZT, DEP 1600, DEP 1200) passam a acompanhar o status assim que forem cadastradas com o código no nome.',
     navPrintStatus:'Imprimir Status (PDF)',
     downloadPdfBtn:'Baixar PDF do Resumo',
     downloadPdfGenerating:'Gerando PDF…',
@@ -1069,6 +1451,23 @@ const I18N = {
     navPendencias:'Pending',
     navFinalizados:'Completed',
     navErros:'Errors',
+    navPlano:'Action Plan',
+    navImagens:'Images',
+    thSop:'SOP', thTreino:'Training',
+    stepSopAria:'SOP approved', stepTreinoAria:'Training done', stepDateTitle:'Date it was done (empty = before tracking began)',
+    planTitle:'Action Plan by activity',
+    planHint:'For each open activity: what will be done, by when, and whether it has been done. Shown on the Summary and on the Progress image.',
+    planLblOpen:'Open activities', planLblWith:'With an action plan', planLblDone:'Plans done', planLblLate:'Overdue',
+    planThProc:'Process', planThStatus:'Current status', planThPlan:'Action Plan', planThPrazo:'Due date', planThColab:'Collaborator', planThSit:'Plan status',
+    planDoneTitle:'Plans of activities already completed',
+    planSt:{nao_iniciado:'Not done', andamento:'In progress', concluido:'Done'},
+    planLate:'Overdue', planUndefined:'To be defined', planNone:'No open activities.', planDue:'due',
+    imgTitle:'Report images',
+    imgHint:'Built from the site data and updated automatically whenever a status, SOP, training or action plan changes.',
+    imgPrevLbl:'Preview', imgDlAll:'Download all 4 (PT + EN)', imgDlPt:'PNG Portuguese', imgDlEn:'PNG English',
+    imgProgTitle:'WMS Implementation – Progress & Action Plan', imgFlowTitle:'Warehouse Flow – Current vs. Future (SAP + WMS)',
+    imgGenerating:'Generating…', imgError:'Could not generate the image — please try again.',
+    imgNote:'✓ validated (officially completed) · ◐ tested · ○ pending · — not on the site. Transactions that are not yet activities on the site (00ZT, DEP 1600, DEP 1200) start following their status as soon as they are added with the code in the name.',
     navPrintStatus:'Print Status (PDF)',
     downloadPdfBtn:'Download Summary PDF',
     downloadPdfGenerating:'Generating PDF…',
@@ -1407,7 +1806,16 @@ function applyAppLang(lang){
   ['pendT1h4','pendT2h4'].forEach(id=>set(id, t.thObs));
   ['pendT1h5','pendT2h5'].forEach(id=>set(id, t.thColab));
   ['pendT1h6','pendT2h6'].forEach(id=>set(id, t.thSuporte));
-  ['pendT1h7','pendT2h7'].forEach(id=>set(id, t.thPlano));
+  ['pendT1h7','pendT2h7','finTh7'].forEach(id=>set(id, t.thSop));
+  ['pendT1h8','pendT2h8','finTh8'].forEach(id=>set(id, t.thTreino));
+  set('navPlano', t.navPlano); set('navImagens', t.navImagens);
+  ['imgTitle','imgHint','imgPrevLbl','imgDlAll','imgProgTitle','imgFlowTitle','imgNote'].forEach(k => set(k, t[k]));
+  document.querySelectorAll('.imgDlPt').forEach(el => el.textContent = t.imgDlPt);
+  document.querySelectorAll('.imgDlEn').forEach(el => el.textContent = t.imgDlEn);
+  set('planTitle', t.planTitle); set('planHint', t.planHint); set('planDoneTitle', t.planDoneTitle);
+  set('planLblOpen', t.planLblOpen); set('planLblWith', t.planLblWith); set('planLblDone', t.planLblDone); set('planLblLate', t.planLblLate);
+  [['planTh1','planThProc'],['planTh2','planThStatus'],['planTh3','planThPlan'],['planTh4','planThPrazo'],['planTh5','planThColab'],['planTh6','planThSit'],
+   ['planTh7','planThProc'],['planTh8','planThPlan'],['planTh9','planThPrazo'],['planTh10','planThSit']].forEach(([id,k]) => set(id, t[k]));
   set('lblNewProc', t.newActivity); setPh('newProc', t.newProcPh);
   set('lblNewColab', t.thColab); setPh('newColab', t.responsavelPh);
   set('lblNewObs', t.thObs); setPh('newObs', t.thObs);
@@ -1457,6 +1865,15 @@ function initAppLang(){
   });
 }
 
+function resumoPlanMeta(a){
+  const t = I18N[appLang] || I18N.pt;
+  const st = planState(a);
+  if(st === 'indefinido' && !isIsoDate(a.planoPrazo)) return '';
+  const color = st === 'concluido' ? '#1a9c5b' : st === 'atrasado' ? '#c81d25' : st === 'andamento' ? '#b9780a' : 'var(--muted)';
+  const label = st === 'atrasado' ? t.planLate : st === 'indefinido' ? '' : t.planSt[st];
+  const due = isIsoDate(a.planoPrazo) ? t.planDue + ' ' + planPrazoLabel(a.planoPrazo) : '';
+  return '<span class="r-plan-meta">' + [due, label ? '<b style="color:' + color + ';">' + escapeHtml(label) + '</b>' : ''].filter(Boolean).join(' · ') + '</span>';
+}
 function renderResumo(){
   const t = I18N[appLang] || I18N.pt;
   const sorted = [...activities].sort(byOrder);
@@ -1495,7 +1912,7 @@ function renderResumo(){
           <td class="${statusClass(a)}">${statusLabel(a)}</td>
           <td>${escapeHtml(trNames(a.colaborador)) || '—'}</td>
           <td>${escapeHtml(trNotes(a.observacao))}</td>
-          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(trText(a.planoAcao)) : t.aDefinir}</td>
+          <td class="${a.planoAcao ? '' : 'r-muted'}">${a.planoAcao ? escapeHtml(trText(a.planoAcao)) : t.aDefinir}${resumoPlanMeta(a)}</td>
         </tr>`).join('')
     : `<tr><td colspan="5" class="empty">${t.emptyPending}</td></tr>`;
 
@@ -2113,7 +2530,9 @@ function fromDbActivity(r){
     observacao: r.observacao, responsavelSistema: r.responsavel_sistema,
     informalStatus: r.informal_status, official: r.official,
     completedAt: r.completed_at, planoAcao: r.plano_acao, order: r.sort_order,
-    createdAt: r.created_at
+    createdAt: r.created_at,
+    testedAt: r.tested_at || '', sop: !!r.sop, sopAt: r.sop_at || '', trained: !!r.trained, trainedAt: r.trained_at || '',
+    planoPrazo: r.plano_prazo || '', planoStatus: r.plano_status || 'nao_iniciado'
   };
 }
 function fromDbError(r){
@@ -2141,7 +2560,7 @@ let activitiesSig = '', errorsSig = '';
 let loadSeqActivities = 0, loadSeqErrors = 0;
 let retryTimerA = null, retryTimerE = null;
 const reloadTimers = {};
-const TABS = ['overview','resumo','pendencias','finalizados','erros'];
+const TABS = ['overview','resumo','imagens','pendencias','plano','finalizados','erros'];
 
 function loadErrorHtml(msg, kind, colspan){
   const t = I18N[appLang] || I18N.pt;
@@ -2426,11 +2845,35 @@ function initUiActions(){
         await updateRow('wms_activities', id, {official: checked, completed_at: checked ? localISODate() : ''});
         scheduleReload('activities', 0);
       }catch(err){ handleWriteError(err, 'activities'); }
+    } else if(el.classList.contains('step-cb')){
+      if(!needDb()){ el.checked = !el.checked; return; }
+      const kind = el.dataset.kind === 'sop' ? 'sop' : 'trained';
+      try{
+        await updateRow('wms_activities', id, kind === 'sop'
+          ? {sop: el.checked, sop_at: el.checked ? localISODate() : ''}
+          : {trained: el.checked, trained_at: el.checked ? localISODate() : ''});
+        scheduleReload('activities', 0);
+      }catch(err){ handleWriteError(err, 'activities'); }
+    } else if(el.classList.contains('step-date') || el.classList.contains('plan-date')){
+      if(!needDb()){ scheduleReload('activities', 0); return; }
+      const v = isIsoDate(el.value) ? el.value : '';
+      const col = el.classList.contains('plan-date') ? 'plano_prazo' : (el.dataset.kind === 'sop' ? 'sop_at' : 'trained_at');
+      try{
+        await updateRow('wms_activities', id, {[col]: v});
+        scheduleReload('activities', 0);
+      }catch(err){ handleWriteError(err, 'activities'); }
+    } else if(el.classList.contains('plan-status')){
+      if(!needDb()){ scheduleReload('activities', 0); return; }
+      el.style.background = PLAN_BG[el.value] || PLAN_BG.nao_iniciado;
+      try{
+        await updateRow('wms_activities', id, {plano_status: el.value});
+        scheduleReload('activities', 0);
+      }catch(err){ handleWriteError(err, 'activities'); }
     } else if(el.classList.contains('status-select')){
       if(!needDb()){ scheduleReload('activities', 0); return; }
       paintStatusSelect(el);
       try{
-        await updateRow('wms_activities', id, {informal_status: el.value});
+        await updateRow('wms_activities', id, {informal_status: el.value, tested_at: el.value === 'OK' ? localISODate() : ''});
         scheduleReload('activities', 0);
       }catch(err){ handleWriteError(err, 'activities'); }
     } else if(el.classList.contains('err-fixed-select')){
@@ -2594,6 +3037,637 @@ function initBadgeTilt(){
     badge.style.transform = idle;
   });
 }
+
+/* ===================== Report images (infographics) =====================
+   Two 1600×900 images in the boss's layout, built from live site data and
+   exported as PNG (PT and EN). The preview in the "Imagens" tab re-renders
+   whenever the data changes; the download renders a fresh copy off-screen. */
+const IG_W = 1600, IG_H = 900;
+const IG_TXT = {
+  pt: {
+    progTitle: 'Implementação do WMS – Progresso e Plano de Ação',
+    progSub: 'Evolução semanal e plano de ação por atividade',
+    updated: 'Atualizado em',
+    progPanel: 'Progresso da Implementação (WMS)',
+    prev: 'Anterior', curr: 'Atual', evo: 'Evolução',
+    rows: [
+      ['Transações', '(Testes de sistema)'],
+      ['Procedimentos', '(SOP)'],
+      ['Treinamento', '(Operacional)']
+    ],
+    trainedDone: n => '(' + n + ' ' + (n === 1 ? 'concluído' : 'concluídos') + ')',
+    planPanel: 'Plano de Ação – Atividades Pendentes',
+    noDue: 'Sem prazo',
+    planUndefined: 'Plano de ação a definir',
+    planMore: n => '+ ' + n + ' ' + (n === 1 ? 'outra atividade' : 'outras atividades') + ' no site',
+    planNone: 'Nenhuma atividade pendente — tudo concluído.',
+    state: {concluido:'Realizado', andamento:'Em andamento', nao_iniciado:'Não realizado', atrasado:'Atrasado', indefinido:'A definir'},
+    teamPanel: 'Rotina e Equipe',
+    team: [
+      ['person', 'Lucas', '(Coordenador)', ['Conduz testes, procedimentos e treinamentos', 'Interface com a operação e a TI']],
+      ['people', 'Equipe de Operações', '', ['Execução diária (recebimento, armazenagem,', 'movimentações e abastecimento)']],
+      ['calendar', 'Rotina', '', ['Acompanhamento diário', 'Revisão semanal e alinhamento com o Sr. Pan']]
+    ],
+    msgTitle: 'Mensagem Principal',
+    msg: m => 'Testes de sistema em <b>' + m.tested.pc + '%</b> (' + m.tested.evoTxt + ' na semana),<br>'
+      + 'SOPs em <b>' + m.sop.pc + '%</b> e <b>' + m.trained.curr + ' ' + (m.trained.curr === 1 ? 'treinamento' : 'treinamentos') + '</b> ' + (m.trained.curr === 1 ? 'concluído' : 'concluídos') + ',<br>'
+      + (m.open ? 'com <b>' + m.withPlan + ' de ' + m.open + '</b> pendências já com plano de ação.' : 'e <b>nenhuma pendência</b> em aberto.'),
+    br02Panel: 'Warehouse BR02 – Transações Diárias no DEP 2000 (validadas no WMS)',
+    br02Badge: (ok, tot) => ok + ' de ' + tot + ' validadas',
+    txState: {ok:'Validada', tested:'Testada', pending:'Pendente', none:'Fora do site'},
+    br02: [
+      ['Criar Endereço (Bin)', 'Cadastrar novos endereços no DEP 2000'],
+      ['Mudança de Locação', 'Mover material entre endereços'],
+      ['Armazenagem (Put-away)', 'Guardar o material no endereço'],
+      ['Consulta de Inventário', 'Consultar estoque por endereço / material'],
+      ['Ajuste de Inventário', 'Corrigir a quantidade em estoque'],
+      ['Reconciliação WMS × SAP', 'Comparar o estoque entre os sistemas'],
+      ['Impressão de Etiquetas', 'Gerar etiquetas de material e endereço'],
+      ['Criar Novos Usuários', 'Dar acesso ao sistema para os operadores']
+    ],
+    // ---- flow image ----
+    flowTitle: 'Fluxo do Armazém – Atual vs. Futuro (SAP + WMS)',
+    flowSub: 'Processo ponta a ponta, transações e pontos de controle',
+    curTitle: 'Processo Atual – SAP + TOTVS',
+    curSub: 'Hoje: controle dividido (SAP para movimentações | TOTVS para armazém)',
+    futTitle: 'Processo Futuro – SAP + WMS',
+    futSub: 'Meta: processo integrado com WMS (a partir do 00ZT)',
+    port: 'Porto / Chegada',
+    gr: ['00ZT', 'Recebimento de', 'Mercadorias (SAP)'],
+    grFut: ['00ZT', 'Recebimento de', 'Mercadorias (SAP + WMS)'],
+    direct: ['Direto para CPS', '(Uso Interno)'],
+    tpl: ['3PL Externo', 'Z48 – Envio para 3PL', 'Z49 – Retorno do 3PL'],
+    insp: ['Inspeção Física', '(Qualidade / Quantidade)'],
+    q1600: ['DEP 1600', 'Qualidade', '(Reparo / Sucata)'],
+    c1200: ['DEP 1200', 'Conferência de', 'Quantidade'],
+    totvs: ['TOTVS – Armazém 40', '(BIN Físico + SAP DEP 2000)', 'BR02 Campinas (Bus) – principal ponto de controle do armazém'],
+    p261: ['261', 'Baixa para Produção', '(Abastecimento da Produção)'],
+    p311: ['311', 'Transferência para', 'DEP 7000 (Vendas / Saída)'],
+    br02Box: ['DEP 2000 / BR02 – Atividades tratadas no BR02 (Armazém Principal)',
+      ['Ajuste de Inventário', 'Armazenagem de Materiais (Put-away)', 'Consulta de Inventário', 'Mudança de Locação', 'Criar Código BIN', 'Imprimir Etiquetas', 'Criar Novos Usuários', 'Reconciliação WMS vs. SAP']],
+    filBox: ['Transferências entre Filiais (via SAP)', ['861 – Entrada vinda de BR05 Campinas / BR0M Araçariguama', '862 – Saída para BR05 Campinas / BR0M Araçariguama']],
+    wmsStarts: ['WMS', 'Começa Aqui', '(a partir do 00ZT)'],
+    wInsp: ['WMS – Inspeção e Qualidade', '(DEP 1600)'],
+    wConf: ['WMS – Conferência de Quantidade', '(DEP 1200)'],
+    wStore: ['WMS – Controle de Armazenagem (DEP 2000 / BR02)',
+      'Endereço / Put-away / Armazenagem de Materiais / Relocação / Mudança de Locação / Consulta de Inventário / Ajuste de Inventário / Criar Código BIN / Imprimir Etiquetas / Criar Novos Usuários / Reconciliação WMS vs. SAP',
+      'Transferências entre Filiais:', '861 – Entrada vinda de BR05 Campinas / BR0M Araçariguama', '862 – Saída para BR05 Campinas / BR0M Araçariguama'],
+    sapWms: ['SAP ⇄ WMS', '(Integrado e em Tempo Real)'],
+    txPanel: 'As 17 Transações do WMS (por Processo)',
+    groups: {rec:'Recebimento e Entrada', qual:'Qualidade e Exceções', arm:'Armazenagem e Movimentações', prod:'Abastecimento da Produção', fil:'Transferências entre Filiais', sys:'Configuração do Sistema e Suporte'},
+    impPanel: 'Principais Melhorias com WMS',
+    imps: ['WMS desde o 00ZT (controle ponta a ponta)', 'Fluxo 3PL controlado (Z48 / Z49) com rastreabilidade', 'DEP 2000 / BR02 como ponto central de controle do armazém', 'Tarefas faltantes do armazém integradas ao DEP 2000', 'Transferências entre BR02, BR05 e BR0M padronizadas', 'Integração com SAP (tempo real)'],
+    keyTitle: 'Mensagem-Chave',
+    key: 'Estamos migrando de um controle dividido (SAP + TOTVS) para um processo integrado SAP + WMS, com controle total desde o recebimento, 3PL, qualidade, armazenagem, transferências entre filiais, abastecimento da produção e vendas (saída).',
+    legend: 'validada · testada · pendente · fora do site'
+  },
+  en: {
+    progTitle: 'WMS Implementation – Progress & Action Plan',
+    progSub: 'Weekly evolution and action plan by activity',
+    updated: 'Updated on',
+    progPanel: 'Implementation Progress (WMS)',
+    prev: 'Previous', curr: 'Current', evo: 'Evolution',
+    rows: [
+      ['Transactions', '(System Tests)'],
+      ['Procedures', '(SOP)'],
+      ['Training', '(Operational)']
+    ],
+    trainedDone: n => '(' + n + ' completed)',
+    planPanel: 'Action Plan – Open Activities',
+    noDue: 'No due date',
+    planUndefined: 'Action plan to be defined',
+    planMore: n => '+ ' + n + ' more ' + (n === 1 ? 'activity' : 'activities') + ' on the site',
+    planNone: 'No open activities — everything is completed.',
+    state: {concluido:'Done', andamento:'In progress', nao_iniciado:'Not done', atrasado:'Overdue', indefinido:'To be defined'},
+    teamPanel: 'Routine & Team',
+    team: [
+      ['person', 'Lucas', '(Coordinator)', ['Lead tests, procedures and training', 'Interface with operations and IT']],
+      ['people', 'Operations Team', '', ['Daily execution (receiving, storage,', 'movements and supply)']],
+      ['calendar', 'Routine', '', ['Daily follow-up', 'Weekly review & alignment with Mr. Pan']]
+    ],
+    msgTitle: 'Key Takeaway',
+    msg: m => 'System tests at <b>' + m.tested.pc + '%</b> (' + m.tested.evoTxt + ' this week),<br>'
+      + 'SOPs at <b>' + m.sop.pc + '%</b> and <b>' + m.trained.curr + ' ' + (m.trained.curr === 1 ? 'training' : 'trainings') + '</b> completed,<br>'
+      + (m.open ? 'with <b>' + m.withPlan + ' of ' + m.open + '</b> open items already having an action plan.' : 'and <b>no open items</b> left.'),
+    br02Panel: 'Warehouse BR02 – Daily Transactions in DEP 2000 (validated in WMS)',
+    br02Badge: (ok, tot) => ok + ' of ' + tot + ' validated',
+    txState: {ok:'Validated', tested:'Tested', pending:'Pending', none:'Not on site'},
+    br02: [
+      ['Create Bin Code (Location)', 'Register new addresses in DEP 2000'],
+      ['Location Change', 'Move material between bins'],
+      ['Material Storage (Put-away)', 'Store material in its bin'],
+      ['Inventory Inquiry', 'Check stock by bin / material'],
+      ['Inventory Adjustment', 'Correct stock quantity'],
+      ['WMS vs. SAP Reconciliation', 'Compare stock between systems'],
+      ['Print Labels', 'Generate material and bin labels'],
+      ['Create New Users', 'Give operators system access']
+    ],
+    flowTitle: 'Warehouse Flow – Current vs. Future (SAP + WMS)',
+    flowSub: 'End-to-end process, transactions and control points',
+    curTitle: 'Current Process – SAP + TOTVS',
+    curSub: 'Today: split control (SAP for movements | TOTVS for warehouse)',
+    futTitle: 'Future Process – SAP + WMS',
+    futSub: 'Target: integrated process with WMS (from 00ZT)',
+    port: 'Port / Arrival',
+    gr: ['00ZT', 'Goods Receipt', '(SAP)'],
+    grFut: ['00ZT', 'Goods Receipt', '(SAP + WMS)'],
+    direct: ['Direct to CPS', '(Internal Use)'],
+    tpl: ['External 3PL', 'Z48 – Shipment to 3rd party', 'Z49 – Return from 3rd party'],
+    insp: ['Physical Inspection', '(Quality / Quantity)'],
+    q1600: ['DEP 1600', 'Quality', '(Repair / Scrap)'],
+    c1200: ['DEP 1200', 'Quantity', 'Check'],
+    totvs: ['TOTVS – Warehouse 40', '(Physical BIN + SAP DEP 2000)', 'BR02 Campinas (Bus) – main warehouse control point'],
+    p261: ['261', 'Issue to Production', '(Production Supply)'],
+    p311: ['311', 'Transfer to DEP 7000', '(Sales / Outbound)'],
+    br02Box: ['DEP 2000 / BR02 – Activities Handled in BR02 (Main Warehouse)',
+      ['Inventory Adjustment', 'Material Storage (Put-away)', 'Inventory Inquiry', 'Location Change', 'Create Bin Code', 'Print Labels', 'Create New Users', 'WMS vs. SAP Reconciliation']],
+    filBox: ['Branch Transfers (via SAP)', ['861 – Inbound from BR05 Campinas / BR0M Araçariguama', '862 – Outbound to BR05 Campinas / BR0M Araçariguama']],
+    wmsStarts: ['WMS', 'Starts Here', '(from 00ZT)'],
+    wInsp: ['WMS – Inspection & Quality', '(DEP 1600)'],
+    wConf: ['WMS – Quantity Check', '(DEP 1200)'],
+    wStore: ['WMS – Storage Control (DEP 2000 / BR02)',
+      'Address / Put-away / Material Storage / Relocation / Location Change / Inventory Inquiry / Inventory Adjustment / Create Bin Code / Print Labels / Create New Users / WMS vs. SAP Reconciliation',
+      'Branch Transfers:', '861 – Inbound from BR05 Campinas / BR0M Araçariguama', '862 – Outbound to BR05 Campinas / BR0M Araçariguama'],
+    sapWms: ['SAP ⇄ WMS', '(Integrated and Real-time)'],
+    txPanel: 'The 17 WMS Transactions (by Process)',
+    groups: {rec:'Receiving & Inbound', qual:'Quality & Exceptions', arm:'Storage & Movements', prod:'Production Supply', fil:'Branch Transfers', sys:'System Setup & Support'},
+    impPanel: 'Key Improvements with WMS',
+    imps: ['WMS from 00ZT (end-to-end control)', '3PL flow controlled (Z48 / Z49) with traceability', 'DEP 2000 / BR02 as central warehouse control point', 'Missing warehouse tasks integrated into DEP 2000', 'Branch transfers standardized between BR02, BR05 and BR0M', 'Integrated with SAP (real-time)'],
+    keyTitle: 'Key Message',
+    key: 'We are moving from split control (SAP + TOTVS) to an integrated SAP + WMS process, with full control from receiving, 3PL, quality, storage, branch transfers, production supply and sales (outbound).',
+    legend: 'validated · tested · pending · not on site'
+  }
+};
+
+// The 17 transactions of the boss's flow image, matched to the site's
+// activities by name so their status follows the site. Rows the site does
+// not track (yet) show as "not on site"; adding an activity whose name
+// contains the code (e.g. "00ZT …", "DEP 1600 …") links it automatically.
+const IG_TX = [
+  {g:'rec',  code:'00ZT', pt:'Recebimento de Mercadorias', en:'Goods Receipt (Port)', m:[/00ZT/i]},
+  {g:'rec',  code:'Z48',  pt:'Envio para 3PL', en:'Shipment to 3PL', m:[/Z48/i]},
+  {g:'rec',  code:'Z49',  pt:'Retorno do 3PL', en:'Return from 3PL', m:[/Z49/i]},
+  {g:'rec',  code:'OSGT', pt:'Recebimento de Terceiros', en:'3rd Party Receipt', m:[/OSGT/i]},
+  {g:'qual', code:'DEP 1600', pt:'Qualidade (Reparo/Sucata)', en:'Quality (Repair/Scrap)', m:[/1600/]},
+  {g:'qual', code:'', pt:'Ajuste de Inventário', en:'Inventory Adjustment', m:[/ajuste/i]},
+  {g:'arm',  code:'DEP 1200', pt:'Conferência de Quantidade', en:'Quantity Check', m:[/confer[eê]ncia/i, /^(?!.*2000).*\bDEP\s*1200\b/i]},
+  {g:'arm',  code:'DEP 2000', pt:'Controle de Armazenagem', en:'Storage Control', m:[/DEP\s*2000/i]},
+  {g:'arm',  code:'', pt:'Armazenagem de Materiais (Put-away)', en:'Material Storage (Put-away)', m:[/armazenamento|armazenagem|put-?away/i]},
+  {g:'arm',  code:'', pt:'Mudança de Locação', en:'Location Change', m:[/mudan[cç]a de loca/i]},
+  {g:'prod', code:'261', pt:'Baixa para Ordem de Produção', en:'Issue to Production Order', m:[/\b261\b/]},
+  {g:'prod', code:'311', pt:'Transferência para DEP 7000', en:'Transfer to DEP 7000', m:[/\b311\b/]},
+  {g:'fil',  code:'861', pt:'Entrada para BR02', en:'Inbound to BR02', m:[/\b861\b/]},
+  {g:'fil',  code:'862', pt:'Saída do BR02', en:'Outbound from BR02', m:[/\b862\b/]},
+  {g:'sys',  code:'', pt:'Consulta de Inventário', en:'Inventory Inquiry', m:[/consulta de (estoque|invent)/i]},
+  {g:'sys',  code:'', pt:'Criar Usuários / Código BIN', en:'Create Users / BIN Code', m:[/usu[aá]rio/i, /bin code|c[oó]digo bin/i], all:true},
+  {g:'sys',  code:'', pt:'Etiquetas / Reconciliação WMS × SAP', en:'Labels / WMS × SAP Reconciliation', m:[/etiqueta/i, /compara|reconcilia/i], all:true}
+];
+const IG_BR02 = [/bin code|c[oó]digo bin/i, /mudan[cç]a de loca/i, /armazenamento|armazenagem|put-?away/i, /consulta de (estoque|invent)/i,
+                 /ajuste/i, /compara|reconcilia/i, /etiqueta/i, /usu[aá]rio/i];
+
+// ---------- data ----------
+function igActState(a){ return a.official ? 'ok' : (a.informalStatus === 'OK' ? 'tested' : 'pending'); }
+function igStateOf(patterns){
+  const acts = activities.filter(a => patterns.some(re => re.test(a.processo || '')));
+  if(!acts.length) return 'none';
+  const st = acts.map(igActState);
+  if(st.every(s => s === 'ok')) return 'ok';
+  if(st.every(s => s !== 'pending')) return 'tested';
+  return 'pending';
+}
+function igMergeStates(list){
+  const real = list.filter(s => s !== 'none');
+  if(!real.length) return 'none';
+  if(real.every(s => s === 'ok')) return 'ok';
+  if(real.every(s => s !== 'pending')) return 'tested';
+  return 'pending';
+}
+function igMetrics(){
+  const today = localISODate();
+  const pd = new Date(); pd.setDate(pd.getDate() - 7);
+  const prev = localISODate(pd);
+  const total = activities.length;
+  // done by date d: flagged, and its date is on/before d (no date = done before tracking began)
+  const doneBy = (on, at, d) => !!on && (!isIsoDate(at) || at <= d);
+  const mk = fn => {
+    const p = activities.filter(a => fn(a, prev)).length, c = activities.filter(a => fn(a, today)).length;
+    const pp = total ? Math.round(p / total * 100) : 0, pc = total ? Math.round(c / total * 100) : 0, evo = pc - pp;
+    return {prev: p, curr: c, pp, pc, evo, evoTxt: (evo > 0 ? '+' : evo < 0 ? '−' : '') + Math.abs(evo) + '%'};
+  };
+  const open = activities.filter(a => !a.official);
+  return {
+    today, prev, total,
+    // test date; for official items without one, the official date (tested by then at the latest)
+    tested: mk((a, d) => doneBy(a.informalStatus === 'OK' || a.official, a.testedAt || (a.official ? String(a.completedAt || '').slice(0, 10) : ''), d)),
+    sop: mk((a, d) => doneBy(a.sop, a.sopAt, d)),
+    trained: mk((a, d) => doneBy(a.trained, a.trainedAt, d)),
+    open: open.length,
+    withPlan: open.filter(a => String(a.planoAcao || '').trim()).length
+  };
+}
+const IG_MON = {pt:['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'], en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']};
+function igDay(iso, lang){
+  if(!isIsoDate(iso)) return '';
+  const p = iso.split('-').map(Number);
+  return String(p[2]).padStart(2, '0') + ' ' + IG_MON[lang][p[1] - 1];
+}
+function igStamp(lang){
+  const d = new Date();
+  return IG_TXT[lang].updated + ' ' + d.toLocaleDateString(lang === 'en' ? 'en-US' : 'pt-BR') + ' ' + d.toLocaleTimeString(lang === 'en' ? 'en-US' : 'pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+// text in the image's language (curated → shared cache → as typed)
+function igTr(text, lang){
+  if(!text) return '';
+  if(lang !== 'en') return text;
+  if(appLang === 'en') return trText(text);
+  const k = String(text).trim();
+  return ACTIVITY_I18N[k] || NOTES_I18N[k] || TR.cache.get(k) || text;
+}
+function igNames(s, lang){ return lang === 'en' && s ? String(s).replace(/(\S)\s+e\s+(?=\S)/g, '$1 and ') : (s || ''); }
+function igClip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; }
+const igE = s => escapeHtml(String(s == null ? '' : s));
+
+// ---------- icons (explicit colours: the image is self-contained) ----------
+function igIcon(name, c, size, bg){
+  bg = bg || '#ffffff';
+  const S = (inner) => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="' + size + '" height="' + size + '">' + inner + '</svg>';
+  switch(name){
+    case 'gear': {
+      let t = '';
+      for(let k = 0; k < 8; k++) t += '<rect x="20.5" y="3" width="7" height="11" rx="1.5" fill="' + c + '" transform="rotate(' + (k * 45) + ' 24 24)"/>';
+      return S(t + '<circle cx="24" cy="24" r="14" fill="' + c + '"/><circle cx="24" cy="24" r="6" fill="' + bg + '"/>');
+    }
+    case 'book': return S('<path d="M5 11c6-3 13-3 19 1 6-4 13-4 19-1v27c-6-3-13-3-19 1-6-4-13-4-19-1z" fill="none" stroke="' + c + '" stroke-width="3.6" stroke-linejoin="round"/><path d="M24 12v27" stroke="' + c + '" stroke-width="3.2"/>');
+    case 'board': return S('<rect x="17" y="7" width="27" height="19" rx="2.5" fill="none" stroke="' + c + '" stroke-width="3.6"/><circle cx="11" cy="22" r="5.5" fill="' + c + '"/><path d="M2 43c0-8 4-13 9-13s9 5 9 13z" fill="' + c + '"/><path d="M17 31l9-6" stroke="' + c + '" stroke-width="3.4" stroke-linecap="round"/>');
+    case 'bars': return S('<rect x="5" y="26" width="9" height="17" rx="1.5" fill="' + c + '"/><rect x="19.5" y="15" width="9" height="28" rx="1.5" fill="' + c + '"/><rect x="34" y="5" width="9" height="38" rx="1.5" fill="' + c + '"/>');
+    case 'target': return S('<circle cx="22" cy="26" r="18" fill="none" stroke="' + c + '" stroke-width="5"/><circle cx="22" cy="26" r="10" fill="none" stroke="' + c + '" stroke-width="5"/><circle cx="22" cy="26" r="3.5" fill="' + c + '"/><path d="M22 26L42 6" stroke="' + c + '" stroke-width="3.6" stroke-linecap="round"/><path d="M36 4h8v8z" fill="' + c + '"/>');
+    case 'calendar': return S('<rect x="5" y="9" width="38" height="34" rx="5" fill="' + c + '"/><rect x="9" y="19" width="30" height="20" rx="2" fill="' + bg + '"/><rect x="12" y="4" width="5" height="10" rx="2" fill="' + c + '"/><rect x="31" y="4" width="5" height="10" rx="2" fill="' + c + '"/>'
+      + '<rect x="12" y="22" width="6" height="5" fill="' + c + '"/><rect x="21" y="22" width="6" height="5" fill="' + c + '"/><rect x="30" y="22" width="6" height="5" fill="' + c + '"/><rect x="12" y="30" width="6" height="5" fill="' + c + '"/><rect x="21" y="30" width="6" height="5" fill="' + c + '"/>');
+    case 'person': return S('<circle cx="24" cy="15" r="9" fill="' + c + '"/><path d="M7 44c0-11 8-17 17-17s17 6 17 17z" fill="' + c + '"/>');
+    case 'people': return S('<circle cx="24" cy="14" r="7" fill="' + c + '"/><circle cx="10" cy="18" r="5.5" fill="' + c + '"/><circle cx="38" cy="18" r="5.5" fill="' + c + '"/><path d="M11 42c0-9 6-14 13-14s13 5 13 14z" fill="' + c + '"/><path d="M1 40c0-7 4-11 9-11 2 0 4 .6 5 1.5-3 3-4.5 6-4.5 9.5z" fill="' + c + '"/><path d="M47 40c0-7-4-11-9-11-2 0-4 .6-5 1.5 3 3 4.5 6 4.5 9.5z" fill="' + c + '"/>');
+    case 'clipboard': return S('<rect x="8" y="7" width="32" height="38" rx="4" fill="none" stroke="' + c + '" stroke-width="3.6"/><rect x="16" y="3" width="16" height="9" rx="2.5" fill="' + c + '"/><path d="M15 23l3 3 6-6M15 34l3 3 6-6" fill="none" stroke="' + c + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 24h7M28 35h7" stroke="' + c + '" stroke-width="3" stroke-linecap="round"/>');
+    case 'ship': return S('<path d="M4 29h40l-6 11H10z" fill="' + c + '"/><rect x="13" y="19" width="22" height="8" rx="1" fill="' + c + '"/><rect x="19" y="11" width="10" height="7" rx="1" fill="' + c + '"/><rect x="22.5" y="5" width="3" height="6" fill="' + c + '"/><path d="M3 44c4 0 4-2 7-2s3 2 7 2 4-2 7-2 3 2 7 2 4-2 7-2 3 2 7 2" fill="none" stroke="' + c + '" stroke-width="2.4"/>');
+    case 'truck': return S('<rect x="3" y="12" width="26" height="20" rx="2" fill="' + c + '"/><path d="M29 18h9l7 8v6H29z" fill="' + c + '"/><circle cx="12" cy="35" r="5" fill="' + c + '" stroke="' + bg + '" stroke-width="2.5"/><circle cx="36" cy="35" r="5" fill="' + c + '" stroke="' + bg + '" stroke-width="2.5"/><rect x="32" y="20" width="6" height="5" fill="' + bg + '"/>');
+    case 'warehouse': return S('<path d="M3 18L24 6l21 12v24H3z" fill="' + c + '"/><rect x="10" y="22" width="28" height="20" fill="' + bg + '"/><path d="M12 27h24M12 32h24M12 37h24" stroke="' + c + '" stroke-width="2.6"/><path d="M19 22v20M29 22v20" stroke="' + c + '" stroke-width="2"/>');
+    case 'search': return S('<circle cx="20" cy="20" r="13" fill="none" stroke="' + c + '" stroke-width="5"/><path d="M30 30l13 13" stroke="' + c + '" stroke-width="6" stroke-linecap="round"/>');
+    case 'boxes': return S('<path d="M24 4l10 5v10l-10 5-10-5V9z" fill="' + c + '"/><path d="M13 23l10 5v11l-10 5-10-5V28z" fill="' + c + '"/><path d="M35 23l10 5v11l-10 5-10-5V28z" fill="' + c + '"/>');
+    case 'monitor': return S('<rect x="3" y="6" width="42" height="28" rx="3" fill="none" stroke="' + c + '" stroke-width="4"/><path d="M18 42h12M24 34v8" stroke="' + c + '" stroke-width="4" stroke-linecap="round"/>');
+    case 'factory': return S('<path d="M3 44V24l10 6v-6l10 6v-6l10 6V8h8v36z" fill="' + c + '"/><rect x="8" y="34" width="5" height="5" fill="' + bg + '"/><rect x="18" y="34" width="5" height="5" fill="' + bg + '"/><rect x="28" y="34" width="5" height="5" fill="' + bg + '"/>');
+    case 'qgear': return igIcon('gear', c, size, bg);
+    case 'check': return S('<circle cx="24" cy="24" r="21" fill="' + c + '"/><path d="M13 24.5l7.5 7.5L35 17.5" fill="none" stroke="' + bg + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>');
+    default: return '';
+  }
+}
+const IG_STATE_COLOR = {ok:'#1e9e52', tested:'#e09a12', pending:'#d6263a', none:'#9aa3b2'};
+function igStateIcon(state, size){
+  const c = IG_STATE_COLOR[state] || IG_STATE_COLOR.none;
+  const S = inner => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="' + size + '" height="' + size + '">' + inner + '</svg>';
+  if(state === 'ok') return igIcon('check', c, size);
+  if(state === 'tested') return S('<circle cx="24" cy="24" r="19" fill="#ffffff" stroke="' + c + '" stroke-width="6"/><path d="M24 5a19 19 0 0 1 0 38z" fill="' + c + '"/>');
+  if(state === 'pending') return S('<circle cx="24" cy="24" r="18" fill="#ffffff" stroke="' + c + '" stroke-width="6"/>');
+  return S('<circle cx="24" cy="24" r="18" fill="#ffffff" stroke="' + c + '" stroke-width="5"/><path d="M15 24h18" stroke="' + c + '" stroke-width="5" stroke-linecap="round"/>');
+}
+function igLogo(){ const im = document.querySelector('.byd-badge img'); return im ? im.src : ''; }
+
+// ---------- shared pieces ----------
+function igHeader(title, sub, lang){
+  const logo = igLogo();
+  return '<div class="ig-header">'
+    + (logo ? '<img class="ig-logo" src="' + logo + '" alt="BYD"/>' : '')
+    + '<div class="ig-hsep"></div>'
+    + '<div class="ig-htitle">' + igE(title) + '</div>'
+    + '<div class="ig-hsub">' + igE(sub) + '</div>'
+    + '<div class="ig-stamp">' + igE(igStamp(lang)) + '</div>'
+    + '<svg class="ig-corner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 100" width="230" height="100"><polygon points="78,0 132,0 62,100 8,100" fill="#d6182d"/><polygon points="142,0 230,0 230,100 72,100" fill="#123a8c"/></svg>'
+    + '</div>';
+}
+function igPanelHead(icon, title, tone, right){
+  if(!icon) return '<div class="ig-phead compact ' + tone + '"><span>' + igE(title) + '</span></div>';
+  return '<div class="ig-phead ' + tone + '">' + igIcon(icon, '#ffffff', 30, tone === 'red' ? '#c8102e' : '#123a8c') + '<span>' + igE(title) + '</span>' + (right || '') + '</div>';
+}
+// absolutely positioned building blocks for the flow diagrams
+function igBox(x, y, w, h, inner, cls, style){
+  return '<div class="ig-node ' + (cls || '') + '" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;' + (style || '') + '">' + inner + '</div>';
+}
+function igLine(x1, y1, x2, y2, c){
+  c = c || '#1f4fb8';
+  if(y1 === y2) return '<div class="ig-ln" style="left:' + Math.min(x1, x2) + 'px;top:' + (y1 - 1.5) + 'px;width:' + Math.abs(x2 - x1) + 'px;height:3px;background:' + c + ';"></div>';
+  return '<div class="ig-ln" style="left:' + (x1 - 1.5) + 'px;top:' + Math.min(y1, y2) + 'px;width:3px;height:' + Math.abs(y2 - y1) + 'px;background:' + c + ';"></div>';
+}
+function igArrow(x1, y1, x2, y2, c){
+  c = c || '#1f4fb8';
+  const s = 7;
+  if(x1 === x2){   // vertical, pointing down
+    return igLine(x1, y1, x2, y2 - s * 1.3, c) + '<div class="ig-ah" style="left:' + (x2 - s) + 'px;top:' + (y2 - s * 1.4) + 'px;border-left:' + s + 'px solid transparent;border-right:' + s + 'px solid transparent;border-top:' + (s * 1.4) + 'px solid ' + c + ';"></div>';
+  }
+  return igLine(x1, y1, x2 - s * 1.3, y2, c) + '<div class="ig-ah" style="left:' + (x2 - s * 1.4) + 'px;top:' + (y2 - s) + 'px;border-top:' + s + 'px solid transparent;border-bottom:' + s + 'px solid transparent;border-left:' + (s * 1.4) + 'px solid ' + c + ';"></div>';
+}
+function igBadge(x, y, letter, c){ return '<div class="ig-abadge" style="left:' + x + 'px;top:' + y + 'px;background:' + c + ';">' + letter + '</div>'; }
+function igNodeState(x, y, state){ return '<div class="ig-nstate" style="left:' + x + 'px;top:' + y + 'px;">' + igStateIcon(state, 22) + '</div>'; }
+
+/* ================= Image 1: Progress & Action Plan ================= */
+function igProgressHtml(lang){
+  const T = IG_TXT[lang], m = igMetrics();
+  let h = '<div class="ig-root" lang="' + lang + '">' + igHeader(T.progTitle, T.progSub, lang);
+
+  // --- Implementation progress ---
+  h += '<div class="ig-panel" style="left:18px;top:122px;width:930px;height:342px;">' + igPanelHead('bars', T.progPanel, 'navy')
+    + '<div class="ig-pcol" style="left:330px;width:200px;text-align:left;">' + igE(T.prev) + '<small>(' + igE(igDay(m.prev, lang)) + ')</small></div>'
+    + '<div class="ig-pcol cur" style="left:500px;width:200px;text-align:right;">' + igE(T.curr) + '<small>(' + igE(igDay(m.today, lang)) + ')</small></div>'
+    + '<div class="ig-pcol evo" style="left:730px;width:160px;">' + igE(T.evo) + '</div>';
+  [['gear', m.tested], ['book', m.sop], ['board', m.trained]].forEach(([ic, r], i) => {
+    const y = 112 + i * 76, lo = Math.min(r.pp, r.pc), gain = Math.max(0, r.pc - r.pp);
+    h += '<div class="ig-prow" style="top:' + y + 'px;">'
+      + '<div class="ig-pic">' + igIcon(ic, '#0f2a6e', 46) + '</div>'
+      + '<div class="ig-plbl"><b>' + igE(T.rows[i][0]) + '</b><span>' + igE(T.rows[i][1]) + '</span></div>'
+      + '<div class="ig-pbar"><div class="nums"><span class="p">' + r.pp + '%</span><span class="c">' + r.pc + '%</span></div>'
+      + '<div class="track"><div class="f1" style="width:' + lo + '%;"></div><div class="f2" style="left:' + lo + '%;width:' + gain + '%;"></div></div>'
+      + (i === 2 ? '<div class="note">' + igE(T.trainedDone(r.curr)) + '</div>' : '') + '</div>'
+      + '<div class="ig-evo ' + (r.evo > 0 ? 'up' : r.evo < 0 ? 'down' : 'flat') + '">' + igE(r.evoTxt) + '</div>'
+      + '</div>';
+  });
+  h += '</div>';
+
+  // --- Action plan (per activity, with "done or not") ---
+  const open = planSorted(activities.filter(a => !a.official));
+  const shown = open.slice(0, 5);
+  h += '<div class="ig-panel" style="left:962px;top:122px;width:620px;height:342px;">' + igPanelHead('target', T.planPanel, 'red');
+  if(!open.length){
+    h += '<div class="ig-plan-none">' + igIcon('check', '#1e9e52', 40) + '<span>' + igE(T.planNone) + '</span></div>';
+  } else {
+    shown.forEach((a, i) => {
+      const st = planState(a);
+      const plan = String(a.planoAcao || '').trim();
+      h += '<div class="ig-plan-row' + (i % 2 ? ' alt' : '') + '" style="top:' + (60 + i * 52) + 'px;">'
+        + '<div class="ig-plan-cal">' + igIcon('calendar', '#2f5bd3', 30) + '</div>'
+        + '<div class="ig-plan-date' + (isIsoDate(a.planoPrazo) ? '' : ' none') + '">' + igE(isIsoDate(a.planoPrazo) ? igDay(a.planoPrazo, lang) : T.noDue) + '</div>'
+        + '<div class="ig-plan-txt"><b>' + igE(igClip(igTr(a.processo, lang), 34)) + '</b>'
+        + (plan ? '<span>' + igE(igClip(igTr(plan, lang), 37)) + '</span>' : '<span class="undef">' + igE(T.planUndefined) + '</span>') + '</div>'
+        + '<div class="ig-chip st-' + st + '">' + igE(T.state[st]) + '</div>'
+        + '</div>';
+    });
+    if(open.length > shown.length) h += '<div class="ig-plan-more">' + igE(T.planMore(open.length - shown.length)) + '</div>';
+  }
+  h += '</div>';
+
+  // --- Routine & team (fixed text from the original slide) ---
+  h += '<div class="ig-panel" style="left:18px;top:478px;width:800px;height:212px;">' + igPanelHead('people', T.teamPanel, 'navy');
+  T.team.forEach((r, i) => {
+    h += '<div class="ig-team-row" style="top:' + (56 + i * 51) + 'px;">'
+      + '<div class="ig-team-ic">' + igIcon(r[0], '#2f5bd3', 32) + '</div>'
+      + '<div class="ig-team-who"><b>' + igE(r[1]) + '</b>' + (r[2] ? ' <span>' + igE(r[2]) + '</span>' : '') + '</div>'
+      + '<div class="ig-team-what">' + r[3].map(x => '• ' + igE(x)).join('<br/>') + '</div></div>';
+  });
+  h += '</div>';
+
+  // --- Key message (written from the data) ---
+  h += '<div class="ig-msg" style="left:832px;top:478px;width:750px;height:212px;">'
+    + '<div class="ig-msg-ic">' + igIcon('target', '#1e8e3e', 104) + '</div><div class="ig-msg-bar"></div>'
+    + '<div class="ig-msg-title">' + igE(T.msgTitle) + '</div><div class="ig-msg-text">' + T.msg(m) + '</div></div>';
+
+  // --- BR02 daily transactions ---
+  const br = IG_BR02.map(re => igStateOf([re]));
+  const okCount = br.filter(s => s === 'ok').length;
+  h += '<div class="ig-panel" style="left:18px;top:704px;width:1564px;height:182px;">'
+    + igPanelHead('clipboard', T.br02Panel, 'navy', '<div class="ig-hlegend">' + ['ok','tested','pending'].map(s => igStateIcon(s, 16) + '<span>' + igE(T.txState[s]) + '</span>').join('') + '</div><div class="ig-hbadge">' + igE(T.br02Badge(okCount, br.length)) + ' ✓</div>');
+  T.br02.forEach((c, i) => {
+    const st = br[i], col = i % 4, row = Math.floor(i / 4);
+    h += '<div class="ig-br-card st-' + st + '" style="left:' + (14 + col * 386) + 'px;top:' + (58 + row * 60) + 'px;">'
+      + '<div class="ig-br-ic">' + igStateIcon(st, 30) + '</div>'
+      + '<div class="ig-br-txt"><b>' + igE(c[0]) + '</b><span>' + igE(c[1]) + '</span></div></div>';
+  });
+  h += '</div>';
+  return h + '</div>';
+}
+
+/* ================= Image 2: Warehouse flow current vs future ================= */
+function igFlowHtml(lang){
+  const T = IG_TXT[lang];
+  const tx = IG_TX.map(r => ({...r, st: igStateOf(r.m)}));
+  const stOf = codes => igMergeStates(tx.filter(r => codes.includes(r.code) || codes.includes(r.pt)).map(r => r.st));
+  const NAVY = '#123a8c', BLUE = '#1f4fb8', RED = '#c8102e', GREEN = '#2e9e4f';
+  const lines = arr => arr.map((x, i) => i === 0 ? '<b>' + igE(x) + '</b>' : '<span>' + igE(x) + '</span>').join('');
+  let h = '<div class="ig-root" lang="' + lang + '">' + igHeader(T.flowTitle, T.flowSub, lang);
+
+  // ----- current process (SAP + TOTVS) -----
+  h += '<div class="ig-col" style="left:10px;top:108px;width:614px;height:706px;">'
+    + '<div class="ig-colhead navy"><b>' + igE(T.curTitle) + '</b><span>' + igE(T.curSub) + '</span></div><div class="ig-colbody">';
+  h += igBox(14, 14, 196, 52, '<div class="row">' + igIcon('ship', NAVY, 34) + '<b>' + igE(T.port) + '</b></div>', 'blue')
+    + igArrow(210, 40, 232, 40, BLUE)
+    + igBox(232, 6, 168, 70, lines(T.gr), 'blue center')
+    + igLine(316, 76, 316, 92, BLUE) + igLine(110, 92, 383, 92, BLUE)
+    + igArrow(110, 92, 110, 108, BLUE) + igArrow(383, 92, 383, 108, BLUE)
+    + igBox(14, 108, 196, 58, '<div class="row">' + igIcon('truck', NAVY, 32) + '<div>' + lines(T.direct) + '</div></div>', 'blue') + igBadge(2, 96, 'A', NAVY)
+    + igBox(258, 108, 250, 72, '<div class="row">' + igIcon('warehouse', NAVY, 32) + '<div>' + lines(T.tpl) + '</div></div>', 'blue') + igBadge(246, 96, 'B', NAVY)
+    + igArrow(110, 166, 110, 196, BLUE)
+    + igBox(14, 196, 224, 54, '<div class="row">' + igIcon('search', NAVY, 28) + '<div>' + lines(T.insp) + '</div></div>', 'blue')
+    + igArrow(46, 250, 46, 282, BLUE)
+    + igBox(4, 282, 160, 76, '<div class="row">' + igIcon('gear', RED, 26) + '<div>' + lines(T.q1600) + '</div></div>', 'red')
+    + igLine(170, 250, 170, 272, BLUE) + igLine(383, 180, 383, 272, BLUE) + igLine(170, 272, 383, 272, BLUE)
+    + igArrow(276, 272, 276, 292, BLUE)
+    + igBox(176, 292, 200, 64, '<div class="row">' + igIcon('boxes', NAVY, 30) + '<div>' + lines(T.c1200) + '</div></div>', 'blue')
+    + igArrow(276, 356, 276, 382, BLUE)
+    + igBox(8, 382, 384, 104, '<div class="row">' + igIcon('monitor', NAVY, 40) + '<div class="big">' + '<b>' + igE(T.totvs[0]) + '</b><span>' + igE(T.totvs[1]) + '</span></div></div><div class="foot">' + igE(T.totvs[2]) + '</div>', 'yellow')
+    + igLine(200, 486, 200, 502, BLUE) + igLine(100, 502, 300, 502, BLUE)
+    + igArrow(100, 502, 100, 520, BLUE) + igArrow(300, 502, 300, 520, BLUE)
+    + igBox(8, 520, 186, 84, '<div class="row">' + igIcon('factory', NAVY, 30) + '<div>' + lines(T.p261) + '</div></div>', 'blue')
+    + igBox(206, 520, 186, 84, '<div class="row">' + igIcon('truck', NAVY, 30) + '<div>' + lines(T.p311) + '</div></div>', 'blue')
+    + igBox(404, 192, 202, 254, '<b class="side-t">' + igE(T.br02Box[0]) + '</b><ul>' + T.br02Box[1].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'side')
+    + igBox(404, 454, 202, 150, '<div class="row">' + igIcon('truck', NAVY, 28) + '<b class="side-t">' + igE(T.filBox[0]) + '</b></div><ul>' + T.filBox[1].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'side');
+  h += '</div></div>';
+
+  // ----- future process (SAP + WMS) -----
+  const stTpl = stOf(['Z48', 'Z49']), st1600 = stOf(['DEP 1600']), st1200 = stOf(['DEP 1200']);
+  const stStore = igMergeStates(tx.filter(r => r.g === 'arm' || r.g === 'sys' || r.pt === 'Ajuste de Inventário').filter(r => r.code !== 'DEP 1200').map(r => r.st));
+  const stFil = stOf(['861', '862']), st261 = stOf(['261']), st311 = stOf(['311']);
+  h += '<div class="ig-col fut" style="left:634px;top:108px;width:548px;height:706px;">'
+    + '<div class="ig-colhead red"><b>' + igE(T.futTitle) + '</b><span>' + igE(T.futSub) + '</span></div><div class="ig-colbody">';
+  h += '<div class="ig-dash" style="left:14px;top:104px;width:522px;height:528px;"></div>'
+    + igBox(12, 14, 190, 52, '<div class="row">' + igIcon('ship', NAVY, 34) + '<b>' + igE(T.port) + '</b></div>', 'blue')
+    + igArrow(202, 40, 224, 40, BLUE)
+    + igBox(224, 6, 200, 72, lines(T.grFut), 'blue center')
+    + igBox(0, 72, 136, 60, lines(T.wmsStarts), 'gtag center')
+    + igLine(324, 78, 324, 124, GREEN) + igLine(135, 124, 398, 124, GREEN)
+    + igArrow(135, 124, 135, 150, GREEN) + igArrow(398, 124, 398, 142, GREEN)
+    + igBox(40, 150, 190, 54, '<div class="row">' + igIcon('truck', NAVY, 30) + '<div>' + lines(T.direct) + '</div></div>', 'blue') + igBadge(28, 138, 'A', GREEN)
+    + igBox(266, 142, 260, 66, '<div class="row">' + igIcon('warehouse', NAVY, 30) + '<div>' + lines(T.tpl) + '</div></div>', 'blue') + igBadge(254, 130, 'B', GREEN) + igNodeState(512, 134, stTpl)
+    + igLine(135, 204, 135, 214, GREEN) + igLine(398, 208, 398, 214, GREEN) + igLine(135, 214, 398, 214, GREEN)
+    + igArrow(275, 214, 275, 228, GREEN)
+    + igBox(110, 228, 330, 48, '<div class="row">' + igIcon('search', NAVY, 26) + '<div>' + lines(T.wInsp) + '</div></div>', 'blue') + igNodeState(428, 220, st1600)
+    + igArrow(275, 276, 275, 292, GREEN)
+    + igBox(110, 292, 330, 48, '<div class="row">' + igIcon('boxes', NAVY, 28) + '<div>' + lines(T.wConf) + '</div></div>', 'blue') + igNodeState(428, 284, st1200)
+    + igArrow(275, 340, 275, 354, GREEN)
+    + igBox(30, 354, 492, 150, '<div class="row">' + igIcon('warehouse', NAVY, 34) + '<div><b>' + igE(T.wStore[0]) + '</b><span class="small">' + igE(T.wStore[1]) + '</span></div></div>'
+        + '<div class="row sep">' + igIcon('truck', NAVY, 30) + '<div><b>' + igE(T.wStore[2]) + '</b><span class="small">• ' + igE(T.wStore[3]) + '<br/>• ' + igE(T.wStore[4]) + '</span></div></div>', 'blue store')
+    + igNodeState(510, 346, stStore) + igNodeState(510, 448, stFil)
+    + igArrow(275, 504, 275, 516, GREEN)
+    + igBox(96, 516, 358, 42, '<div class="row center"><b class="sap">SAP</b><b class="swap">⇄</b><b>WMS</b><span>' + igE(T.sapWms[1]) + '</span></div>', 'blue')
+    + igLine(275, 558, 275, 564, GREEN) + igLine(142, 564, 402, 564, GREEN)
+    + igArrow(142, 564, 142, 574, GREEN) + igArrow(402, 564, 402, 574, GREEN)
+    + igBox(24, 574, 236, 54, '<div class="row">' + igIcon('factory', NAVY, 28) + '<div>' + lines(T.p261) + '</div></div>', 'blue compact') + igNodeState(248, 566, st261)
+    + igBox(282, 574, 240, 54, '<div class="row">' + igIcon('truck', NAVY, 28) + '<div>' + lines(T.p311) + '</div></div>', 'blue compact') + igNodeState(510, 566, st311);
+  h += '</div></div>';
+
+  // ----- the 17 transactions with live status -----
+  const okN = tx.filter(r => r.st === 'ok').length;
+  h += '<div class="ig-panel" style="left:1194px;top:108px;width:396px;height:436px;">' + igPanelHead(null, T.txPanel, 'navy');
+  const groupIcon = {rec:'truck', qual:'gear', arm:'warehouse', prod:'factory', fil:'truck', sys:'monitor'};
+  let y = 52;
+  ['rec','qual','arm','prod','fil','sys'].forEach(g => {
+    const rows = tx.filter(r => r.g === g);
+    const gh = Math.max(rows.length * 15 + 8, 46);
+    h += '<div class="ig-txg" style="top:' + y + 'px;height:' + gh + 'px;"><div class="ig-txg-h">' + igIcon(groupIcon[g], '#123a8c', 20) + '<b>' + igE(T.groups[g]) + ' (' + rows.length + ')</b></div><div class="ig-txg-l">'
+      + rows.map(r => '<div class="ig-tx">' + igStateIcon(r.st, 12) + '<span>' + (r.code ? '<b>' + igE(r.code) + '</b> – ' : '') + igE(lang === 'en' ? r.en : r.pt) + '</span></div>').join('')
+      + '</div></div>';
+    y += gh + 3;
+  });
+  h += '<div class="ig-txleg">' + ['ok','tested','pending','none'].map(s => igStateIcon(s, 12) + '<span>' + igE(T.txState[s]) + '</span>').join('') + '<b>' + okN + '/17 ✓</b></div>';
+  h += '</div>';
+
+  // ----- improvements (fixed text) -----
+  h += '<div class="ig-panel" style="left:1194px;top:552px;width:396px;height:262px;">' + igPanelHead(null, T.impPanel, 'red')
+    + '<div class="ig-imps">' + T.imps.map(x => '<div>' + igIcon('check', '#1e9e52', 22) + '<span>' + igE(x) + '</span></div>').join('') + '</div></div>';
+
+  // ----- key message banner -----
+  h += '<div class="ig-banner"><div class="ig-banner-l"><div class="ig-banner-lin">' + igIcon('target', '#ffffff', 40, '#c8102e') + '<b>' + igE(T.keyTitle) + '</b></div></div>'
+    + '<div class="ig-banner-t">' + igE(T.key) + '</div></div>';
+  return h + '</div>';
+}
+
+
+/* ---------- Imagens tab: live previews + PNG download ---------- */
+const IG_KINDS = {
+  progress: { html: igProgressHtml, file: {pt:'wms-progresso-plano-de-acao', en:'wms-progress-action-plan'} },
+  flow:     { html: igFlowHtml,     file: {pt:'wms-fluxo-armazem-atual-vs-futuro', en:'wms-warehouse-flow-current-vs-future'} }
+};
+let igPreviewLang = null;      // null = follow the site language
+let igDirty = true;
+function igPrevLang(){ return igPreviewLang || appLang; }
+function igFitPreviews(){
+  document.querySelectorAll('#tab-imagens .ig-frame').forEach(f => {
+    const sc = f.querySelector('.ig-scale');
+    if(sc) sc.style.transform = 'scale(' + (f.clientWidth / IG_W) + ')';
+  });
+}
+function renderInfographicPreviews(){
+  const tab = document.getElementById('tab-imagens');
+  if(!tab) return;
+  if(!tab.classList.contains('active')){ igDirty = true; return; }
+  igDirty = false;
+  const lang = igPrevLang();
+  document.querySelectorAll('#igLangSw button').forEach(b => b.classList.toggle('active', b.dataset.iglang === lang));
+  const loaded = typeof activitiesLoaded === 'undefined' || activitiesLoaded;
+  Object.keys(IG_KINDS).forEach(kind => {
+    const frame = document.getElementById('igFrame-' + kind);
+    if(!frame) return;
+    if(!loaded){
+      frame.innerHTML = '<div class="ig-loading">' + escapeHtml((I18N[appLang] || I18N.pt).loading || 'Carregando...') + '</div>';
+      return;
+    }
+    try{
+      frame.innerHTML = '<div class="ig-scale">' + IG_KINDS[kind].html(lang) + '</div>';
+    }catch(e){
+      console.error('Image preview failed:', e);
+      frame.innerHTML = '<div class="ig-loading">⚠️</div>';
+    }
+  });
+  igFitPreviews();
+}
+if(window.ResizeObserver){
+  // rAF: adjusting inside the callback can trigger a benign "ResizeObserver loop" error
+  let igRaf = 0;
+  const igRO = new ResizeObserver(() => { cancelAnimationFrame(igRaf); igRaf = requestAnimationFrame(igFitPreviews); });
+  document.querySelectorAll('#tab-imagens .ig-frame').forEach(f => igRO.observe(f));
+}
+window.addEventListener('resize', igFitPreviews);
+
+// English image: the few free texts it shows (names and plans of the open
+// activities) are translated on the device first and shared like the rest.
+async function igEnsureEnglish(){
+  const keys = new Set();
+  planSorted(activities.filter(a => !a.official)).slice(0, 5).forEach(a => [a.processo, a.planoAcao].forEach(s => {
+    const k = String(s || '').trim();
+    if(k && !ACTIVITY_I18N[k] && !NOTES_I18N[k] && !TR.cache.has(k) && !TR.failed.has(k)) keys.add(k);
+  }));
+  if(!keys.size) return;
+  const tr = await getTranslator();
+  if(!tr) return;
+  const rows = [];
+  for(const k of keys){
+    try{
+      const out = String(await tr.translate(k) || '').trim();
+      if(out){ TR.cache.set(k, out); rows.push({src: k, lang: 'en', translated: out, origin: 'auto'}); }
+    }catch(e){}
+  }
+  if(rows.length && sb){
+    try{ await sb.from('wms_translations').upsert(rows, {onConflict: 'src,lang', ignoreDuplicates: true}); }catch(e){}
+  }
+}
+function igWaitImages(root){
+  return Promise.all([...root.querySelectorAll('img')].map(im => (im.complete && im.naturalWidth) ? null
+    : new Promise(r => { im.onload = im.onerror = r; setTimeout(r, 4000); })));
+}
+async function igRenderPng(kind, lang){
+  if(typeof html2canvas !== 'function') throw new Error('html2canvas unavailable');
+  if(lang === 'en') await Promise.race([igEnsureEnglish(), new Promise(r => setTimeout(r, 25000))]);
+  const host = document.createElement('div');
+  host.className = 'ig-offscreen';
+  host.innerHTML = IG_KINDS[kind].html(lang);
+  document.body.appendChild(host);
+  try{
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    await igWaitImages(host);
+    const canvas = await html2canvas(host.firstElementChild, {
+      scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false,
+      scrollX: 0, scrollY: 0, windowWidth: Math.max(document.documentElement.clientWidth, 1280), windowHeight: Math.max(window.innerHeight, 900)
+    });
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    if(!blob) throw new Error('empty image');
+    return blob;
+  }finally{
+    host.remove();
+  }
+}
+function igSaveBlob(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+function igFileName(kind, lang){ return IG_KINDS[kind].file[lang] + '-' + lang.toUpperCase() + '-' + localISODate() + '.png'; }
+async function igDownload(jobs, btn){
+  if(btn.disabled) return;
+  const t = I18N[appLang] || I18N.pt;
+  const all = [...document.querySelectorAll('#tab-imagens .ig-dl, #igDownloadAll')];
+  const label = btn.innerHTML;
+  all.forEach(b => b.disabled = true);
+  btn.innerHTML = '⏳ ' + escapeHtml(t.imgGenerating);
+  try{
+    for(const [kind, lang] of jobs){
+      igSaveBlob(await igRenderPng(kind, lang), igFileName(kind, lang));
+    }
+  }catch(err){
+    console.error(err);
+    showSaveError(t.imgError);
+  }finally{
+    all.forEach(b => b.disabled = false);
+    btn.innerHTML = label;
+  }
+}
+document.addEventListener('click', (e) => {
+  const sw = e.target.closest('#igLangSw button');
+  if(sw){
+    igPreviewLang = sw.dataset.iglang; renderInfographicPreviews();
+    // English preview: translate its few free texts (this click allows the on-device model download)
+    if(igPreviewLang === 'en') igEnsureEnglish().then(() => { if(igPrevLang() === 'en') renderInfographicPreviews(); }, () => {});
+    return;
+  }
+  const dl = e.target.closest('#tab-imagens .ig-dl');
+  if(dl){ igDownload([[dl.dataset.ig, dl.dataset.lang]], dl); return; }
+  const allBtn = e.target.closest('#igDownloadAll');
+  if(allBtn) igDownload([['progress','pt'], ['progress','en'], ['flow','pt'], ['flow','en']], allBtn);
+});
 
 document.addEventListener('DOMContentLoaded', () => { initUiActions(); initCharts(); init(); initBadgeTilt(); initTheme(); initAppLang(); });
 
