@@ -686,6 +686,9 @@
   .ig-node.store{justify-content:flex-start;padding:7px 12px;}
   .ig-node.store b{font-size:14.5px;}
   .ig-node .small{display:block;font-size:11.5px;line-height:1.3;margin-top:2px;}
+  .ig-node.store .small{margin-top:6px;font-size:11px;line-height:1.32;}
+  .ig-node.store b.st-t{font-size:13.5px;line-height:1.22;}
+  .ig-node ul.fil{margin-top:5px;padding-left:13px;font-size:10.8px;line-height:1.28;}
   .ig-node .row.sep{border-top:1.5px dashed #9bb0e0;margin-top:7px;padding-top:7px;}
   .ig-node .sap{font-size:22px;color:#ffffff;background:#1f6fd6;border-radius:4px;padding:0 8px;}
   .ig-node .swap{font-size:24px;color:#1f4fb8;}
@@ -3102,7 +3105,7 @@ const IG_TXT = {
     c1200: ['DEP 1200', 'Conferência de', 'Quantidade'],
     totvs: ['TOTVS – Armazém 40', '(BIN Físico + SAP DEP 2000)', 'BR02 Campinas (Bus) – principal ponto de controle do armazém'],
     p261: ['261', 'Baixa para Produção', '(Abastecimento da Produção)'],
-    p311: ['311', 'Transferência para', 'DEP 7000 (Vendas / Saída)'],
+    p311: ['311', 'Transferência para DEP 7000', '(Fábrica / Produção)'],
     br02Box: ['DEP 2000 / BR02 – Atividades tratadas no BR02 (Armazém Principal)',
       ['Ajuste de Inventário', 'Armazenagem de Materiais (Put-away)', 'Consulta de Inventário', 'Mudança de Locação', 'Criar Código BIN', 'Imprimir Etiquetas', 'Criar Novos Usuários', 'Reconciliação WMS vs. SAP']],
     filBox: ['Transferências entre Filiais (via SAP)', ['861 – Entrada vinda de BR05 Campinas / BR0M Araçariguama', '862 – Saída para BR05 Campinas / BR0M Araçariguama']],
@@ -3178,7 +3181,7 @@ const IG_TXT = {
     c1200: ['DEP 1200', 'Quantity', 'Check'],
     totvs: ['TOTVS – Warehouse 40', '(Physical BIN + SAP DEP 2000)', 'BR02 Campinas (Bus) – main warehouse control point'],
     p261: ['261', 'Issue to Production', '(Production Supply)'],
-    p311: ['311', 'Transfer to DEP 7000', '(Sales / Outbound)'],
+    p311: ['311', 'Transfer to DEP 7000', '(Factory / Production)'],
     br02Box: ['DEP 2000 / BR02 – Activities Handled in BR02 (Main Warehouse)',
       ['Inventory Adjustment', 'Material Storage (Put-away)', 'Inventory Inquiry', 'Location Change', 'Create Bin Code', 'Print Labels', 'Create New Users', 'WMS vs. SAP Reconciliation']],
     filBox: ['Branch Transfers (via SAP)', ['861 – Inbound from BR05 Campinas / BR0M Araçariguama', '862 – Outbound to BR05 Campinas / BR0M Araçariguama']],
@@ -3467,13 +3470,14 @@ function igFlowHtml(lang){
     + igArrow(276, 272, 276, 292, BLUE)
     + igBox(176, 292, 200, 64, '<div class="row">' + igIcon('boxes', NAVY, 30) + '<div>' + lines(T.c1200) + '</div></div>', 'blue')
     + igArrow(276, 356, 276, 382, BLUE)
-    + igBox(8, 382, 384, 104, '<div class="row">' + igIcon('monitor', NAVY, 40) + '<div class="big">' + '<b>' + igE(T.totvs[0]) + '</b><span>' + igE(T.totvs[1]) + '</span></div></div><div class="foot">' + igE(T.totvs[2]) + '</div>', 'yellow')
+    + igBox(8, 382, 370, 104, '<div class="row">' + igIcon('monitor', NAVY, 40) + '<div class="big">' + '<b>' + igE(T.totvs[0]) + '</b><span>' + igE(T.totvs[1]) + '</span></div></div><div class="foot">' + igE(T.totvs[2]) + '</div>', 'yellow')
     + igLine(200, 486, 200, 502, BLUE) + igLine(100, 502, 300, 502, BLUE)
     + igArrow(100, 502, 100, 520, BLUE) + igArrow(300, 502, 300, 520, BLUE)
     + igBox(8, 520, 186, 84, '<div class="row">' + igIcon('factory', NAVY, 30) + '<div>' + lines(T.p261) + '</div></div>', 'blue')
-    + igBox(206, 520, 186, 84, '<div class="row">' + igIcon('truck', NAVY, 30) + '<div>' + lines(T.p311) + '</div></div>', 'blue')
+    + igBox(206, 520, 186, 84, '<div class="row">' + igIcon('factory', NAVY, 30) + '<div>' + lines(T.p311) + '</div></div>', 'blue')
     + igBox(404, 192, 202, 254, '<b class="side-t">' + igE(T.br02Box[0]) + '</b><ul>' + T.br02Box[1].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'side')
-    + igBox(404, 454, 202, 150, '<div class="row">' + igIcon('truck', NAVY, 28) + '<b class="side-t">' + igE(T.filBox[0]) + '</b></div><ul>' + T.filBox[1].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'side');
+    + igBox(404, 454, 202, 150, '<div class="row">' + igIcon('truck', NAVY, 28) + '<b class="side-t">' + igE(T.filBox[0]) + '</b></div><ul>' + T.filBox[1].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'side')
+    + igArrow(378, 478, 404, 478, BLUE);
   h += '</div></div>';
 
   // ----- future process (SAP + WMS) -----
@@ -3497,15 +3501,17 @@ function igFlowHtml(lang){
     + igArrow(275, 276, 275, 292, GREEN)
     + igBox(110, 292, 330, 48, '<div class="row">' + igIcon('boxes', NAVY, 28) + '<div>' + lines(T.wConf) + '</div></div>', 'blue') + igNodeState(428, 284, st1200)
     + igArrow(275, 340, 275, 354, GREEN)
-    + igBox(30, 354, 492, 150, '<div class="row">' + igIcon('warehouse', NAVY, 34) + '<div><b>' + igE(T.wStore[0]) + '</b><span class="small">' + igE(T.wStore[1]) + '</span></div></div>'
-        + '<div class="row sep">' + igIcon('truck', NAVY, 30) + '<div><b>' + igE(T.wStore[2]) + '</b><span class="small">• ' + igE(T.wStore[3]) + '<br/>• ' + igE(T.wStore[4]) + '</span></div></div>', 'blue store')
-    + igNodeState(510, 346, stStore) + igNodeState(510, 448, stFil)
-    + igArrow(275, 504, 275, 516, GREEN)
-    + igBox(96, 516, 358, 42, '<div class="row center"><b class="sap">SAP</b><b class="swap">⇄</b><b>WMS</b><span>' + igE(T.sapWms[1]) + '</span></div>', 'blue')
-    + igLine(275, 558, 275, 564, GREEN) + igLine(142, 564, 402, 564, GREEN)
-    + igArrow(142, 564, 142, 574, GREEN) + igArrow(402, 564, 402, 574, GREEN)
-    + igBox(24, 574, 236, 54, '<div class="row">' + igIcon('factory', NAVY, 28) + '<div>' + lines(T.p261) + '</div></div>', 'blue compact') + igNodeState(248, 566, st261)
-    + igBox(282, 574, 240, 54, '<div class="row">' + igIcon('truck', NAVY, 28) + '<div>' + lines(T.p311) + '</div></div>', 'blue compact') + igNodeState(510, 566, st311);
+    + igBox(30, 354, 300, 136, '<div class="row">' + igIcon('warehouse', NAVY, 32) + '<b class="st-t">' + igE(T.wStore[0]).replace(' (', '<br/>(') + '</b></div><span class="small">' + igE(T.wStore[1]) + '</span>', 'blue store')
+    + igNodeState(318, 346, stStore)
+    + igArrow(330, 422, 352, 422, GREEN)
+    + igBox(352, 354, 170, 136, '<div class="row">' + igIcon('truck', NAVY, 28) + '<b>' + igE(String(T.wStore[2]).replace(/:\s*$/, '')) + '</b></div><ul class="fil">' + [T.wStore[3], T.wStore[4]].map(x => '<li>' + igE(x) + '</li>').join('') + '</ul>', 'blue store')
+    + igNodeState(510, 346, stFil)
+    + igArrow(180, 490, 180, 502, GREEN)
+    + igBox(96, 502, 358, 40, '<div class="row center"><b class="sap">SAP</b><b class="swap">⇄</b><b>WMS</b><span>' + igE(T.sapWms[1]) + '</span></div>', 'blue')
+    + igLine(275, 542, 275, 550, GREEN) + igLine(142, 550, 402, 550, GREEN)
+    + igArrow(142, 550, 142, 562, GREEN) + igArrow(402, 550, 402, 562, GREEN)
+    + igBox(24, 562, 236, 56, '<div class="row">' + igIcon('factory', NAVY, 28) + '<div>' + lines(T.p261) + '</div></div>', 'blue compact') + igNodeState(248, 554, st261)
+    + igBox(282, 562, 240, 56, '<div class="row">' + igIcon('factory', NAVY, 28) + '<div>' + lines(T.p311) + '</div></div>', 'blue compact') + igNodeState(510, 554, st311);
   h += '</div></div>';
 
   // ----- the 17 transactions with live status -----
