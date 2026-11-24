@@ -565,7 +565,7 @@
   .ig-htitle{position:absolute;left:222px;top:8px;font-size:42px;font-weight:800;color:#0f2a6e;white-space:nowrap;letter-spacing:-0.5px;}
   .ig-hsub{position:absolute;left:224px;top:62px;font-size:24px;font-weight:600;color:#4a5468;white-space:nowrap;}
   .ig-stamp{position:absolute;right:250px;top:70px;font-size:14px;font-weight:600;color:#6b7484;white-space:nowrap;}
-  .ig-corner{position:absolute;right:0;top:0;}
+  .ig-corner{position:absolute;right:0;top:0;width:230px;height:100px;}   /* svg wrapped: html2canvas misplaces an svg that is itself offset */
 
   /* panels */
   .ig-panel{position:absolute;background:#ffffff;border:1px solid #d5dbe7;border-radius:12px;overflow:hidden;
@@ -3338,7 +3338,7 @@ function igHeader(title, sub, lang){
     + '<div class="ig-htitle">' + igE(title) + '</div>'
     + '<div class="ig-hsub">' + igE(sub) + '</div>'
     + '<div class="ig-stamp">' + igE(igStamp(lang)) + '</div>'
-    + '<svg class="ig-corner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 100" width="230" height="100"><polygon points="78,0 132,0 62,100 8,100" fill="#d6182d"/><polygon points="142,0 230,0 230,100 72,100" fill="#123a8c"/></svg>'
+    + '<div class="ig-corner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 100" width="230" height="100"><polygon points="78,0 132,0 62,100 8,100" fill="#d6182d"/><polygon points="142,0 230,0 230,100 72,100" fill="#123a8c"/></svg></div>'
     + '</div>';
 }
 function igPanelHead(icon, title, tone, right){
